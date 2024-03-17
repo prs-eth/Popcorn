@@ -214,6 +214,6 @@ python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 u
 
 ## Fun fact
 
- - "POPCORN" stands for POPulation from CORrse census Numbers🍿.
+ - "POPCORN" stands for POPulation from COaRrse census Numbers🍿.
 
 
