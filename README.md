@@ -157,6 +157,8 @@ python run_eval.py -occmodel -senbuilds -S2 -NIR -S1 -treg <inference dataset na
 
 ## Training 🏋️‍♂️ 
 
+> Note: ⚙️ Release of the `train.py` is coming soon.
+
 Train Switzerland:
 ```
 python run_train.py -S2 -NIR -S1 -treg che -tregtrain che --seed 1600 -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.2267 --save-dir <your/save/dir>
@@ -203,9 +205,11 @@ Accept that you are bootstraping glcoud to a trusted machine, and the Earth Engi
 
 ### Download raw data
 ```
-python utils/01_download_ee_ .py bounding box coordinates ...
+python utils/01_download_gee_country.py 28.782241 -2.903950 30.961654 -0.994897 rwa
+python utils/01_download_gee_country.py 5.855713 45.759859 10.656738 47.864774 che
+python utils/01_download_gee_country.py -67.282031 17.874492 -65.205615 18.522873 pricp2
+python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 uga
 ``` 
-... TODO description coming soon ...
 
 
 ## Fun fact
