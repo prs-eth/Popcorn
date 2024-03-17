@@ -49,6 +49,8 @@ With our work we aim to democratize access to up-to-date and high-resolution pop
 
 The population map of Rwanda is available on Google Earth Engine:
 
+
+
 ```
 var popDensity = ee.Image("projects/ee-nandometzger/assets/POPCORNv1");
 ```
