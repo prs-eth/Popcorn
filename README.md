@@ -179,7 +179,7 @@ Train Rwanda 2022 real census:
 python run_train.py -S2 -NIR -S1 -treg rwa -tregtrain rwa2022 --seed 1600 -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407  --save-dir <your/save/dir>
 ```
 
-## Recompute the dataset
+## Recompute the dataset 🖥️
 
 To ensure full reproducibility and additional expandability of our workflow. We provide the full data pipeline to recompute the input images:
 
@@ -211,6 +211,16 @@ python utils/01_download_gee_country.py -67.282031 17.874492 -65.205615 18.52287
 python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 uga
 ``` 
 
+## Citation 🎓
+
+```
+@article{metzger2023high,
+  title={High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2},
+  author={Metzger, Nando and Daudt, Rodrigo Caye and Tuia, Devis and Schindler, Konrad},
+  journal={arXiv preprint arXiv:2311.14006},
+  year={2023} 
+}
+```
 
 ## Fun fact
 
