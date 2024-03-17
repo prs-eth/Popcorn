@@ -1,0 +1,7 @@
+plot_outputs
+PopMapEnv
+gdal*
+proj*
+vis
+*__pycache__
+wandb/
