@@ -48,6 +48,9 @@ Moreover, we find that, once trained, the model can be applied repeatedly to tra
 With our work we aim to democratize access to up-to-date and high-resolution population maps, recognizing that some regions faced with particularly strong population dynamics may lack the resources for costly micro-census campaigns.
 
 The population map of Rwanda is available on Google Earth Engine:
+<p align="center">
+  <img src="imgs/popcorn_code.png" alt="EE DEMO" width="600"/>
+</p>
 
 ```
 var popDensity = ee.Image("projects/ee-nandometzger/assets/POPCORNv1");
