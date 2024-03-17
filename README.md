@@ -36,6 +36,11 @@
 > #### 💡 **TL;DR**
 > **POPCORN** is a lightweight population mapping method using free satellite images and minimal data, surpassing existing accuracy and providing interpretable maps for mapping populations in data-scarce regions.
 
+## News 📰
+
+- 17th March 2024: Website is live. <a href="https://popcorn-population.github.io/" target="_blank">Visit Website</a>
+
+
 ### Abstract 🔍 
 Detailed population maps play an important role in diverse fields ranging from humanitarian action to urban planning. 
 Generating such maps in a timely and scalable manner presents a challenge, especially in data-scarce regions.
@@ -209,7 +214,7 @@ python utils/01_download_gee_country.py 28.782241 -2.903950 30.961654 -0.994897 
 python utils/01_download_gee_country.py 5.855713 45.759859 10.656738 47.864774 che
 python utils/01_download_gee_country.py -67.282031 17.874492 -65.205615 18.522873 pricp2
 python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 uga
-``` 
+```
 
 ## Citation 🎓
 
