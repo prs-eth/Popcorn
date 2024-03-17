@@ -49,7 +49,7 @@ With our work we aim to democratize access to up-to-date and high-resolution pop
 
 The population map of Rwanda is available on Google Earth Engine:
 <p align="center">
-  <img src="imgs/popcorn_code.png" alt="EE DEMO" width="600"/>
+  <img src="imgs/popcorn_code2.png" alt="EE DEMO" width="500"/>
 </p>
 
 ```
