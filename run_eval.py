@@ -283,9 +283,7 @@ class Trainer:
 
         # load checkpoint
         checkpoint = torch.load(path)
-        self.model[j].load_state_dict(checkpoint['model'])
-        # self.optimizer.load_state_dict(checkpoint['optimizer'])
-        # self.scheduler.load_state_dict(checkpoint['scheduler'])
+        self.model[j].load_state_dict(checkpoint['model']) 
         self.info["epoch"] = checkpoint['epoch']
         self.info["iter"] = checkpoint['iter']
 
