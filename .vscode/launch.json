@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run eval.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run_eval.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-occmodel",
+                "-senbuilds",
+                "-S2",
+                "-NIR",
+                "-S1",
+                "-treg", "rwa",
+                "--fourseasons",
+                "--resume",
+                    "./checkpoints/POPCORN_RWA_checkpoints/model1/last_model.pth",
+                    "./checkpoints/POPCORN_RWA_checkpoints/model2/last_model.pth",
+                    "./checkpoints/POPCORN_RWA_checkpoints/model3/last_model.pth",
+                    "./checkpoints/POPCORN_RWA_checkpoints/model4/last_model.pth",
+                    "./checkpoints/POPCORN_RWA_checkpoints/model5/last_model.pth", 
+            ], 
+        }
+    ]
+}
