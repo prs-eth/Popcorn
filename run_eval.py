@@ -38,7 +38,6 @@ class Trainer:
         self.args = args
 
         # set up experiment folder
-        # self.args.experiment_folder = os.path.join("/",os.path.join(*args.resume[0].split("/")[:-1]), "eval_outputs_ensemble_{}_members_{}".format(time.strftime("%Y%m%d-%H%M%S"), len(args.resume)))
         self.args.experiment_folder = os.path.join(os.path.dirname(args.resume[0]), "eval_outputs_ensemble_{}_members_{}".format(time.strftime("%Y%m%d-%H%M%S"), len(args.resume)))
         self.experiment_folder = self.args.experiment_folder
         print("Experiment folder:", self.experiment_folder)
@@ -96,10 +95,8 @@ class Trainer:
                 output_map_count = torch.zeros((h, w), dtype=torch.int16)
 
                 # if len(self.model) > 1:
-                output_map_squared = torch.zeros((h, w), dtype=torch.float32)
-                # output_STD_map = torch.zeros((h, w), dtype=torch.float32)
-                output_scale_map_squared = torch.zeros((h, w), dtype=torch.float32)
-                # output_scale_STD_map = torch.zeros((h, w), dtype=torch.float32)
+                output_map_squared = torch.zeros((h, w), dtype=torch.float32) 
+                output_scale_map_squared = torch.zeros((h, w), dtype=torch.float32) 
 
                 for sample in tqdm(testdataloader, leave=True):
                     sample = to_cuda_inplace(sample)
@@ -149,8 +146,7 @@ class Trainer:
                 ###### average over the number of times each pixel was visited ######
                 print("averaging over the number of times each pixel was visited")
                 # mask out values that are not visited of visited exactly once
-                div_mask = output_map_count > 1
-                # a = output_map.clone()
+                div_mask = output_map_count > 1 
 
                 a = output_map[div_mask] / output_map_count[div_mask].to(torch.float32)
                 output_map[div_mask] = output_map[div_mask] / output_map_count[div_mask].to(torch.float32)
@@ -190,11 +186,6 @@ class Trainer:
                     print(this_metrics)
                     self.target_test_stats = {**self.target_test_stats, **this_metrics}
 
-                    # get the metrics for the clearly built up areas
-                    built_up = census_gt>10
-                    self.target_test_stats = {**self.target_test_stats,
-                                              **get_test_metrics(census_pred[built_up], census_gt[built_up].float().cuda(), tag="MainCensusPos_{}_{}".format(testdataloader.dataset.region, level))}
-                    
 
                 # adjust map (disaggregate) and recalculate everything
                 print("-"*50)
@@ -213,12 +204,7 @@ class Trainer:
                     census_pred, census_gt = testdataloader.dataset.convert_popmap_to_census(output_map_adj, gpu_mode=gpu_mode, level=level, details_to=details_path)
                     test_stats_adj = get_test_metrics(census_pred, census_gt.float().cuda(), tag="AdjCensus_{}_{}".format(testdataloader.dataset.region, level))
                     print(test_stats_adj)
-                    
-                    built_up = census_gt>10
-                    test_stats_adj = {**test_stats_adj,
-                                      **get_test_metrics(census_pred[built_up], census_gt[built_up].float().cuda(), tag="AdjCensusPos_{}_{}".format(testdataloader.dataset.region, level))}
-                    
-                    # print(test_stats_adj)
+
                     self.target_test_stats = {**self.target_test_stats,
                                               **test_stats_adj}
             
