@@ -47,9 +47,9 @@ snuggs==1.4.7
 sympy==1.12
 tabulate==0.9.0
 termcolor==2.3.0
-torch==2.1.1+cu118
-torchaudio==2.1.1+cu118
-torchvision==0.16.1+cu118
+# torch==2.1.1+cu118
+# torchaudio==2.1.1+cu118
+# torchvision==0.16.1+cu118
 tqdm==4.66.1
 triton==2.1.0
 typing_extensions==4.4.0

@@ -1,8 +1,5 @@
 <p align="center">
   <img src="imgs/POPCORN_logo_wide.png" alt="POPCORN LOGO" width="600"/>
-<!--   <img src="imgs/eth_logo_kurz_neg.png#gh-dark-mode-only" alt="ETH logo" width="200"/> -->
-<!--   <img src="imgs/eth_logo_kurz_pos.png#gh-light-mode-only" alt="ETH logo" width="200"/> -->
-<!--   <img src="imgs/logo_EPFL.png" alt="EPFL Logo" width="200"/> -->
 </p>
 
 
@@ -38,6 +35,7 @@
 
 ## News 📰
 
+- 20th March 2024: We published the evaluation code and the pretrained models. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 17th March 2024: Website is live. <a href="https://popcorn-population.github.io/" target="_blank">Visit Website</a>
 
 
@@ -86,9 +84,10 @@ Set up the base environment like this:
 ```bash
 python -m venv PopMapEnv
 source PopMapEnv/bin/activate
-pip install requirements.txt
+pip install -r requirements.txt
+pip install torch==2.1.1 torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cu118
 ```
-Additionally, install GDAL without sudo access  as described in this [post](https://askubuntu.com/questions/689065/how-could-i-install-gdal-without-root)
+If you plan to use the preprocessing tools in this reposiotry, you also need to install GDAL. An easy way to install GDAL without sudo access is as follows:
  - download the [gdal-3.4.1 binary](https://gdal.org/download.html), and extract it.
  - install GDAL using these commands (this might take some time):
 ```bash
@@ -149,7 +148,7 @@ Checkpoints can be downloaded from [here](https://drive.google.com/drive/folders
 
 ### Inference 🚀📊⚖️ 
 
-You can use the `run_eval.py` script to generate maps and evaluate them subsequently using
+Make sure to add you datapath in the `utils/constants.py` file. You can now use the `run_eval.py` script to generate maps and evaluate them subsequently using
 ```
 python run_eval.py -occmodel -senbuilds -S2 -NIR -S1 -treg <inference dataset name> --fourseasons \
   --resume \
@@ -157,6 +156,7 @@ python run_eval.py -occmodel -senbuilds -S2 -NIR -S1 -treg <inference dataset na
     /path/to/model2/last_model.pth \
     ....
 ```
+The outputs will be written into the folder of the first model. `/path/to/model1/last_model.pth` in the case above
 
 ...
 
@@ -184,13 +184,16 @@ Train Rwanda 2022 real census:
 python run_train.py -S2 -NIR -S1 -treg rwa -tregtrain rwa2022 --seed 1600 -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407  --save-dir <your/save/dir>
 ```
 
+For the results in the paper, we trained the Bag-of-POPCORN with parameter settings `--seed {1600,1601,1602,1603,1604}` 
+
+
 ## Recompute the dataset 🖥️
 
 To ensure full reproducibility and additional expandability of our workflow. We provide the full data pipeline to recompute the input images:
 
-### Connect to Google Earth Engine 
+### 1. Connect to Google Earth Engine 
 
-Make sure you have the [gcloud](https://cloud.google.com/sdk/docs/install#linux) application installed.
+Make sure you have the [gcloud](https://cloud.google.com/sdk/docs/install#linux) application installed. You need a Google Earth Engine account for this.
 
 #### Local Machine
 
@@ -201,20 +204,36 @@ gcloud auth application-default login
 
 #### Remote Machine (SSH)
 
-Make sure gcloud is installed on the local as well as the remote device. Connect via ssh to you remote machine and run the following command on your *remote* terminal: 
+If you are on a remote machine, make sure gcloud is installed on the local as well as the remote device. Connect via ssh to you remote machine and run the following command on your *remote* terminal: 
 ```
 gcloud auth application-default login --no-browser
 ```
 This will generate another gcloud command like `gcloud auth application-default login --remote-bootstrap="...."`. Copy this command and paste it into your *local* terminal.
 Accept that you are bootstraping glcoud to a trusted machine, and the Earth Engine login window in your browser should be prompted. After successful browser authentification, your local terminal should provide an output `https://localhost:8085/...`. Copy and paste this line into your remote terminal. 
 
-### Download raw data
+### 2. Download raw data
 ```
 python utils/01_download_gee_country.py 28.782241 -2.903950 30.961654 -0.994897 rwa
 python utils/01_download_gee_country.py 5.855713 45.759859 10.656738 47.864774 che
 python utils/01_download_gee_country.py -67.282031 17.874492 -65.205615 18.522873 pricp2
 python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 uga
 ```
+The resulting files will appear in your google drive.
+
+
+### 3. Merging Google Earth Engine outputs
+
+For large regions, GEE will return individual tiles of the scenes. You can merge them together with the `utils/03_merge_tiffs.py` script. We recommend placing the tiles in the `raw/EE/<region>/<modality>` folders, where the modality is `S1spring` or `S2Awinter` for example. You can then execute the following commands to perform the merging:
+
+```
+python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/rwa <path to data>/PopMapData/merged/EE/rwa 
+python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/che <path to data>/PopMapData/merged/EE/che 
+python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/pricp2 <path to data>/PopMapData/merged/EE/pricp2 
+python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/uga <path to data>/PopMapData/merged/EE/uga 
+```
+
+> Note: This process applies a lossless compression, but the outputs can still be quite large. There is a automatic functionality in the dataloader to create virtual files, in case merged files cannot be created here. 
+
 
 ## Citation 🎓
 
@@ -229,6 +248,6 @@ python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 u
 
 ## Fun fact
 
- - "POPCORN" stands for POPulation from COaRrse census Numbers🍿.
-
+ - "POPCORN" stands for POPulation from COaRrse census Numbers🍿. 
+ - POPCORN is the successor of [POMELO](https://www.nature.com/articles/s41598-022-24495-w)
 

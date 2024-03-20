@@ -1,3 +1,8 @@
+"""
+Project: 🍿POPCORN: High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2 🌍🛰️
+Nando Metzger, 2024
+"""
+
 import os
 import argparse
 from collections import defaultdict
@@ -16,7 +21,7 @@ from shutil import copyfile
 
 # from arguments import eval_parser
 from arguments.eval import parser as eval_parser
-from data.PopulationDataset_target import Population_Dataset_target
+from data.PopulationDataset import Population_Dataset
 from utils.metrics import get_test_metrics
 from utils.utils import to_cuda_inplace, seed_all
 from model.get_model import get_model_kwargs, model_dict
@@ -26,9 +31,6 @@ from utils.constants import config_path
 from utils.constants import  overlap, testlevels, testlevels_eval
 from utils.constants import inference_patch_size as ips
 
-import nvidia_smi
-nvidia_smi.nvmlInit()
-
 
 class Trainer:
 
@@ -36,7 +38,7 @@ class Trainer:
         self.args = args
 
         # set up experiment folder
-        self.args.experiment_folder = os.path.join("/",os.path.join(*args.resume[0].split("/")[:-1]), "eval_outputs_ensemble_{}_members_{}".format(time.strftime("%Y%m%d-%H%M%S"), len(args.resume)))
+        self.args.experiment_folder = os.path.join(os.path.dirname(args.resume[0]), "eval_outputs_ensemble_{}_members_{}".format(time.strftime("%Y%m%d-%H%M%S"), len(args.resume)))
         self.experiment_folder = self.args.experiment_folder
         print("Experiment folder:", self.experiment_folder)
 
@@ -75,10 +77,9 @@ class Trainer:
                 self.resume(checkpoint, j)
 
 
-    def test_target(self, save=False, full=False, save_scatter=False):
+    def test_target(self, save=False, full=False):
         
         # Test on target domain
-        save_scatter = save_scatter
         for j in range(len(self.model)):
             self.model[j].eval()
         self.test_stats = defaultdict(float)
@@ -94,10 +95,8 @@ class Trainer:
                 output_map_count = torch.zeros((h, w), dtype=torch.int16)
 
                 # if len(self.model) > 1:
-                output_map_squared = torch.zeros((h, w), dtype=torch.float32)
-                # output_STD_map = torch.zeros((h, w), dtype=torch.float32)
-                output_scale_map_squared = torch.zeros((h, w), dtype=torch.float32)
-                # output_scale_STD_map = torch.zeros((h, w), dtype=torch.float32)
+                output_map_squared = torch.zeros((h, w), dtype=torch.float32) 
+                output_scale_map_squared = torch.zeros((h, w), dtype=torch.float32) 
 
                 for sample in tqdm(testdataloader, leave=True):
                     sample = to_cuda_inplace(sample)
@@ -147,8 +146,7 @@ class Trainer:
                 ###### average over the number of times each pixel was visited ######
                 print("averaging over the number of times each pixel was visited")
                 # mask out values that are not visited of visited exactly once
-                div_mask = output_map_count > 1
-                # a = output_map.clone()
+                div_mask = output_map_count > 1 
 
                 a = output_map[div_mask] / output_map_count[div_mask].to(torch.float32)
                 output_map[div_mask] = output_map[div_mask] / output_map_count[div_mask].to(torch.float32)
@@ -188,17 +186,7 @@ class Trainer:
                     print(this_metrics)
                     self.target_test_stats = {**self.target_test_stats, **this_metrics}
 
-                    # get the metrics for the clearly built up areas
-                    built_up = census_gt>10
-                    self.target_test_stats = {**self.target_test_stats,
-                                              **get_test_metrics(census_pred[built_up], census_gt[built_up].float().cuda(), tag="MainCensusPos_{}_{}".format(testdataloader.dataset.region, level))}
-                    
-                    # create scatterplot and upload to wandb
-                    if save_scatter:
-                        scatterplot = scatter_plot3(census_pred.tolist(), census_gt.tolist(), log_scale=True)
-                        if scatterplot is not None:
-                            self.target_test_stats["Scatter/Scatter_{}_{}".format(testdataloader.dataset.region, level)] = wandb.Image(scatterplot)
-                    
+
                 # adjust map (disaggregate) and recalculate everything
                 print("-"*50)
                 print("Adjusting map")
@@ -216,21 +204,9 @@ class Trainer:
                     census_pred, census_gt = testdataloader.dataset.convert_popmap_to_census(output_map_adj, gpu_mode=gpu_mode, level=level, details_to=details_path)
                     test_stats_adj = get_test_metrics(census_pred, census_gt.float().cuda(), tag="AdjCensus_{}_{}".format(testdataloader.dataset.region, level))
                     print(test_stats_adj)
-                    
-                    built_up = census_gt>10
-                    test_stats_adj = {**test_stats_adj,
-                                      **get_test_metrics(census_pred[built_up], census_gt[built_up].float().cuda(), tag="AdjCensusPos_{}_{}".format(testdataloader.dataset.region, level))}
-                    
-                    # print(test_stats_adj)
+
                     self.target_test_stats = {**self.target_test_stats,
                                               **test_stats_adj}
-
-                    if save_scatter:
-                        # create scatterplot and upload to wandb
-                        scatterplot = scatter_plot3(census_pred.tolist(), census_gt.tolist(), log_scale=True)
-                        if scatterplot is not None:
-                            self.target_test_stats["Scatter/Scatter_{}_{}_adj".format(testdataloader.dataset.region, level)] = wandb.Image(scatterplot)
-                    
             
             # save the target test stats
             wandb.log({**{k + '/targettest': v for k, v in self.target_test_stats.items()}, **self.info}, self.info["iter"])
@@ -259,7 +235,7 @@ class Trainer:
         # create the raw source dataset
         need_asc = ["uga"]
         datasets = {
-            "test_target": [ Population_Dataset_target(reg, patchsize=ips, overlap=overlap, sentinelbuildings=args.sentinelbuildings, ascfill=reg in need_asc,
+            "test_target": [ Population_Dataset(reg, patchsize=ips, overlap=overlap, sentinelbuildings=args.sentinelbuildings, ascfill=reg in need_asc,
                                                        fourseasons=self.args.fourseasons, train_level=lvl, **input_defs)
                                 for reg,lvl in zip(args.target_regions, args.train_level) ]
         }
