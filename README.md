@@ -158,8 +158,6 @@ python run_eval.py -occmodel -senbuilds -S2 -NIR -S1 -treg <inference dataset na
 ```
 The outputs will be written into the folder of the first model. `/path/to/model1/last_model.pth` in the case above
 
-...
-
 ## Training 🏋️‍♂️ 
 
 > Note: ⚙️ Release of the `train.py` is coming soon.
