@@ -19,7 +19,6 @@ import rasterio
 from rasterio.windows import Window
 from shutil import copyfile
 
-# from arguments import eval_parser
 from arguments.eval import parser as eval_parser
 from data.PopulationDataset import Population_Dataset
 from utils.metrics import get_test_metrics
