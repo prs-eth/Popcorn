@@ -208,7 +208,7 @@ If you are on a remote machine, make sure gcloud is installed on the local as we
 gcloud auth application-default login --no-browser
 ```
 This will generate another gcloud command like `gcloud auth application-default login --remote-bootstrap="...."`. Copy this command and paste it into your *local* terminal.
-Accept that you are bootstraping glcoud to a trusted machine, and the Earth Engine login window in your browser should be prompted. After successful browser authentification, your local terminal should provide an output `https://localhost:8085/...`. Copy and paste this line into your remote terminal. 
+Accept that you are bootstrapping glcoud to a trusted machine, and the Earth Engine login window in your browser should be prompted. After successful browser authentification, your local terminal should provide an output `https://localhost:8085/...`. Copy and paste this line into your remote terminal. 
 
 ### 2. Download raw data
 ```
@@ -233,6 +233,9 @@ python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/uga <path to dat
 
 > Note: This process applies a lossless compression, but the outputs can still be quite large. There is a automatic functionality in the dataloader to create virtual files, in case merged files cannot be created here. 
 
+### 4. Census files preprocessing
+
+>  ⚙️ Release of the census preprocessing scripts is coming soon.
 
 ## Citation 🎓
 
