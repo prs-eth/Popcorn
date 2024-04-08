@@ -57,7 +57,7 @@ The population map of Rwanda is available on Google Earth Engine:
 </p>
 
 ```
-var popDensity = ee.Image("projects/ee-nandometzger/assets/POPCORNv1");
+var popDensity = ee.Image("projects/ee-nandometzger/assets/POPCORNv3");
 ```
 <p align="center">
   <img src="imgs/ee_demo.gif" alt="EE DEMO" width="600"/>
