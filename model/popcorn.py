@@ -67,6 +67,8 @@ class POPCORN(nn.Module):
                     
         # unet_out = 8*2
         unet_out = self.S1*stage1feats + self.S2*stage1feats
+        head_input_dim += unet_out
+                    
         num_params_sar = sum(p.numel() for p in self.unetmodel.sar_stream.parameters() if p.requires_grad)
         print("trainable DDA SAR: ", num_params_sar)
 
@@ -78,7 +80,6 @@ class POPCORN(nn.Module):
 
         # Build the head
         h = 64
-        head_input_dim += unet_out
         self.head = nn.Sequential(
             nn.Conv2d(head_input_dim, h, kernel_size=1, padding=0), nn.ReLU(inplace=True),
             nn.Conv2d(h, h, kernel_size=1, padding=0), nn.ReLU(inplace=True),
@@ -105,7 +106,7 @@ class POPCORN(nn.Module):
 
 
     def forward(self, inputs, train=False, padding=True, return_features=True,
-                encoder_no_grad=False, unet_no_grad=False, sparse=False):
+                encoder_no_grad=False, unet_no_grad=False):
         """
         Forward pass of the model
         Assumptions:
