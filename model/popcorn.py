@@ -1,4 +1,8 @@
- 
+"""
+Project: 🍿POPCORN: High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2 🌍🛰️
+Nando Metzger, 2024
+"""
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
