@@ -157,7 +157,7 @@ class POPCORN(nn.Module):
 
         headin = torch.cat(middlefeatures, dim=1)
 
-        # forward the head 
+        # forward the head, TODO: make this module sparse
         out = self.head(headin)[:,0]
 
         # Population map and total count
