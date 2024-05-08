@@ -144,7 +144,7 @@ class UrbanExtractionDataset(AbstractUrbanExtractionDataset):
             self.transform = augmentations.compose_transformations(cfg)
 
         # load normalization stats
-        self.dataset_stats = load_json(os.path.join('configs', 'my_dataset_stats_unified_2A.json'))
+        self.dataset_stats = load_json(os.path.join('configs', 'dataset_stats.json'))
         for mkey in self.dataset_stats.keys():
             if isinstance(self.dataset_stats[mkey], dict):
                 for key,val in self.dataset_stats[mkey].items():
@@ -191,7 +191,6 @@ class UrbanExtractionDataset(AbstractUrbanExtractionDataset):
             s1_img, geotransform, crs = self._get_sentinel1_data(site, patch_id)
             s2_img, _, _ = self._get_sentinel2_data(site, patch_id)
 
-            # s1_img = ((s1_img.permute((0,2,3,1)) - s1_img['mean'].cuda() ) / s1_img['std'].cuda()).permute((0,3,1,2))
             if self.new:
                 s1_img = ((s1_img - self.dataset_stats["sen1"]['mean'] ) / self.dataset_stats["sen1"]['std']).astype(np.float32)
                 s2_img = ((s2_img - self.dataset_stats["sen2springNIR"]['mean'] ) / self.dataset_stats["sen2springNIR"]['std']).astype(np.float32)
@@ -265,7 +264,7 @@ class AbstractSpaceNet7Dataset(torch.utils.data.Dataset):
         
 
         # load normalization stats
-        self.dataset_stats = load_json(os.path.join('configs', 'my_dataset_stats_unified_2A.json'))
+        self.dataset_stats = load_json(os.path.join('configs', 'dataset_stats.json'))
         for mkey in self.dataset_stats.keys():
             if isinstance(self.dataset_stats[mkey], dict):
                 for key,val in self.dataset_stats[mkey].items():
@@ -338,11 +337,10 @@ class SpaceNet7Dataset(AbstractSpaceNet7Dataset):
             img, _, _ = self._get_sentinel2_data(aoi_id)
         elif mode == 'sar':
             img, _, _ = self._get_sentinel1_data(aoi_id)
-        else:  # fusion baby!!!
+        else:  # fusion baby!!! # haha, Nice comment @SebastianHafner
             s1_img, _, _ = self._get_sentinel1_data(aoi_id)
             s2_img, _, _ = self._get_sentinel2_data(aoi_id)
-
-            # s1_img = ((s1_img.permute((0,2,3,1)) - s1_img['mean'].cuda() ) / s1_img['std'].cuda()).permute((0,3,1,2))
+ 
             if self.new:
                 s1_img = ((s1_img - self.dataset_stats["sen1"]['mean'] ) / self.dataset_stats["sen1"]['std']).astype(np.float32)
                 s2_img = ((s2_img - self.dataset_stats["sen2springNIR"]['mean'] ) / self.dataset_stats["sen2springNIR"]['std']).astype(np.float32)

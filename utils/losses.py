@@ -67,9 +67,10 @@ def get_loss(output, gt, scale=None,
     # occupancy scale regularization
     if scale is not None:
         if torch.isnan(scale).any():
-            print("NaN values detected in scale.")
+            raise ValueError("nan values detected in scale.")
         if torch.isinf(scale).any():
-            print("inf values detected in scale.")
+            raise ValueError("inf values detected in scale.")
+        
         metricdict["scale"] = scale.float().abs().mean()
         if scale_regularization>0.0:
             optimization_loss += scale_regularization * metricdict["scale"]

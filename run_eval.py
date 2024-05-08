@@ -52,13 +52,10 @@ class Trainer:
         
         # define architecture
         self.model = []
-        for _ in args.resume:
-            if args.model in model_dict:
-                model_kwargs = get_model_kwargs(args, args.model)
-                model = model_dict[args.model](**model_kwargs).cuda()
-                self.model.append(model)
-            else:
-                raise ValueError(f"Unknown model: {args.model}")
+        for _ in args.resume: 
+            model_kwargs = get_model_kwargs(args, args.model)
+            model = model_dict[args.model](**model_kwargs).cuda()
+            self.model.append(model) 
         
         # wandb config
         wandb.init(project=args.wandb_project, dir=self.args.experiment_folder)
@@ -223,7 +220,7 @@ class Trainer:
 
         input_defs = {'S1': args.Sentinel1, 'S2': args.Sentinel2, 'NIR': args.NIR}
 
-        self.dataset_stats = load_json(os.path.join(config_path, 'dataset_stats', 'my_dataset_stats_unified_2A.json'))
+        self.dataset_stats = load_json(os.path.join(config_path, 'dataset_stats.json'))
         for mkey in self.dataset_stats.keys():
             if isinstance(self.dataset_stats[mkey], dict):
                 for key,val in self.dataset_stats[mkey].items():

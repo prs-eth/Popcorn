@@ -15,8 +15,7 @@ parser.add_argument("-senbuilds", "--sentinelbuildings", help='', action='store_
 parser.add_argument("-fs", "--fourseasons", action='store_true', help="")
 parser.add_argument('-fe', '--feature_extractor', type=str, help=' ', default="DDA")
 parser.add_argument('-pret', '--pretrained', help='', action='store_true')
-parser.add_argument('-tlevel', '--train_level', nargs='+', default=["coarse"], help="needs to be know to perform the adjustment")
-parser.add_argument("-sunet", "--sparse_unet", help='',action='store_true')
+parser.add_argument('-tlevel', '--train_level', nargs='+', default=["coarse"], help="needs to be know to perform the adjustment") 
 parser.add_argument("-binit", "--biasinit", help='', type=float, default=0.75)
 
 # misc

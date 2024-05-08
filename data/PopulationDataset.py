@@ -1,4 +1,7 @@
-
+"""
+Project: 🍿POPCORN: High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2 🌍🛰️
+Nando Metzger, 2024
+"""
 
 import os
 import torch
@@ -69,7 +72,6 @@ class Population_Dataset(Dataset):
         self.fourseasons = fourseasons
         self.mode = mode
         self.transform = transform
-        self.use2A = True
         self.sentinelbuildings = sentinelbuildings
         self.ascfill = ascfill
         self.split = split
@@ -104,14 +106,17 @@ class Population_Dataset(Dataset):
             if split=="all":
                 self.coarse_census = self.coarse_census
                 print("Using", len(self.coarse_census), "samples in this dataset")
+
             elif split=="train":
                 # shuffle and split the data
                 self.coarse_census = self.coarse_census.sample(frac=1, random_state=1610)[:int(len(self.coarse_census)*0.8)].reset_index(drop=True)
+
                 print("Using", len(self.coarse_census), "samples for weakly supervised training")
             elif split=="val":
                 # shuffle and split the data
                 self.coarse_census = self.coarse_census.sample(frac=1, random_state=1610)[int(len(self.coarse_census)*0.8):].reset_index(drop=True)
                 print("Using", len(self.coarse_census), "samples for weakly supervised validation")
+
             else:
                 raise ValueError("Split not recognized")
 
@@ -154,6 +159,7 @@ class Population_Dataset(Dataset):
             covar_root = covar_root.replace("scratch3", "scratch2")
         print("Using covar_root: ", covar_root)
         
+        # load the covariates for Sentinel 1
         S1spring_file = os.path.join(covar_root,  os.path.join("S1spring", region +"_S1spring.tif"))
         S1summer_file = os.path.join(covar_root,  os.path.join("S1summer", region +"_S1summer.tif"))
         S1autumn_file = os.path.join(covar_root,  os.path.join("S1autumn", region +"_S1autumn.tif"))
@@ -167,12 +173,11 @@ class Population_Dataset(Dataset):
 
             self.S1Asc_file = {0: S1springAsc_file, 1: S1summerAsc_file, 2: S1autumnAsc_file, 3: S1winterAsc_file}
 
-        if not os.path.exists(S1spring_file):
-            print(S1spring_file, "Does not exist, using virtual rasters for S1")
-            # print(os.path.exists(os.path.join(rawEE_map_root, region, "S1spring")))
+        if not os.path.exists(S1spring_file): 
+            print(S1spring_file, "Does not exist, are you sure your file paths were set correctly?")
+            print("Start searching and building virtual files from the unmerged raw files...") 
             global rawEE_map_root
-            # rawEE_map_root = rawEE_map_root
-            print(rawEE_map_root)
+             
             if not os.path.exists(os.path.join(rawEE_map_root, region, "S1spring")):
                 rawEE_map_root = rawEE_map_root.replace("scratch", "scratch3")
             if not os.path.exists(os.path.join(rawEE_map_root, region, "S1spring")):
@@ -186,11 +191,13 @@ class Population_Dataset(Dataset):
 
             if not os.path.exists(os.path.join(rawEE_map_root, region, "S1winter_out.vrt")):
                 print("VRT {} file do not exist".format(os.path.join(rawEE_map_root, region, "S1winter_out.vrt")))
+
                 from osgeo import gdal
                 _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1spring_out.vrt"), [ os.path.join(spring_dir, f) for f in os.listdir(spring_dir) if f.endswith(".tif")])
                 _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1summer_out.vrt"), [ os.path.join(summer_dir, f) for f in os.listdir(summer_dir) if f.endswith(".tif")])
                 _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1autumn_out.vrt"), [ os.path.join(autumn_dir, f) for f in os.listdir(autumn_dir) if f.endswith(".tif")])
                 _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1winter_out.vrt"), [ os.path.join(winter_dir, f) for f in os.listdir(winter_dir) if f.endswith(".tif")])
+
             S1spring_file = os.path.join(rawEE_map_root, region, "S1spring_out.vrt")
             S1summer_file = os.path.join(rawEE_map_root, region, "S1summer_out.vrt")
             S1autumn_file = os.path.join(rawEE_map_root, region, "S1autumn_out.vrt")
@@ -203,11 +210,14 @@ class Population_Dataset(Dataset):
                 winter_dir = os.path.join(rawEE_map_root, region, "S1winterAsc")
 
                 if not os.path.exists(os.path.join(rawEE_map_root, region, "S1winterAsc_out.vrt")):
+                    print("VRT {} file do not exist".format(os.path.join(rawEE_map_root, region, "S1winterAsc_out.vrt")))
+
                     from osgeo import gdal
                     _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1springAsc_out.vrt"), [ os.path.join(spring_dir, f) for f in os.listdir(spring_dir) if f.endswith(".tif")])
                     _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1summerAsc_out.vrt"), [ os.path.join(summer_dir, f) for f in os.listdir(summer_dir) if f.endswith(".tif")])
                     _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1autumnAsc_out.vrt"), [ os.path.join(autumn_dir, f) for f in os.listdir(autumn_dir) if f.endswith(".tif")])
                     _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S1winterAsc_out.vrt"), [ os.path.join(winter_dir, f) for f in os.listdir(winter_dir) if f.endswith(".tif")])
+
                 S1springAsc_file = os.path.join(rawEE_map_root, region, "S1springAsc_out.vrt")
                 S1summerAsc_file = os.path.join(rawEE_map_root, region, "S1summerAsc_out.vrt")
                 S1autumnAsc_file = os.path.join(rawEE_map_root, region, "S1autumnAsc_out.vrt")
@@ -219,41 +229,39 @@ class Population_Dataset(Dataset):
         self.S1_file = {0: S1spring_file, 1: S1summer_file, 2: S1autumn_file, 3: S1winter_file}
         self.S1_file = {0: S1spring_file, 1: S1summer_file, 2: S1autumn_file, 3: S1winter_file}
         
-        if self.use2A:
-            S2spring_file = os.path.join(covar_root,  os.path.join("S2Aspring", region +"_S2Aspring.tif"))
-            S2summer_file = os.path.join(covar_root,  os.path.join("S2Asummer", region +"_S2Asummer.tif"))
-            S2autumn_file = os.path.join(covar_root,  os.path.join("S2Aautumn", region +"_S2Aautumn.tif"))
-            S2winter_file = os.path.join(covar_root,  os.path.join("S2Awinter", region +"_S2Awinter.tif"))
+        # load the covariates for Sentinel 2
+        S2spring_file = os.path.join(covar_root,  os.path.join("S2Aspring", region +"_S2Aspring.tif"))
+        S2summer_file = os.path.join(covar_root,  os.path.join("S2Asummer", region +"_S2Asummer.tif"))
+        S2autumn_file = os.path.join(covar_root,  os.path.join("S2Aautumn", region +"_S2Aautumn.tif"))
+        S2winter_file = os.path.join(covar_root,  os.path.join("S2Awinter", region +"_S2Awinter.tif"))
+        
+        # if not exists, we use the virtual rasters of the raw files, if exists, we use the preprocessed files 
+        if not os.path.exists(S2spring_file):
+            print(S2spring_file, "Does not exist, are you sure your file paths were set correctly?")
+            print("Start searching and building virtual files from the unmerged raw files...")
             
-            # if not exists, we use the virtual rasters of the raw files
-            # if exists, we use the preprocessed files 
-            if not os.path.exists(S2spring_file):
-                print(S2spring_file, "Does not exist, using virtual rasters for S2")
-                
-                spring_dir = os.path.join(rawEE_map_root, region, "S2Aspring")
-                summer_dir = os.path.join(rawEE_map_root, region, "S2Asummer")
-                autumn_dir = os.path.join(rawEE_map_root, region, "S2Aautumn")
-                winter_dir = os.path.join(rawEE_map_root, region, "S2Awinter")
+            spring_dir = os.path.join(rawEE_map_root, region, "S2Aspring")
+            summer_dir = os.path.join(rawEE_map_root, region, "S2Asummer")
+            autumn_dir = os.path.join(rawEE_map_root, region, "S2Aautumn")
+            winter_dir = os.path.join(rawEE_map_root, region, "S2Awinter")
 
-                if not os.path.exists(os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt")):
-                    from osgeo import gdal
-                    _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Aspring_out.vrt"), [ os.path.join(spring_dir, f) for f in os.listdir(spring_dir) if f.endswith(".tif")])
-                    _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Asummer_out.vrt"), [ os.path.join(summer_dir, f) for f in os.listdir(summer_dir) if f.endswith(".tif")])
-                    _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Aautumn_out.vrt"), [ os.path.join(autumn_dir, f) for f in os.listdir(autumn_dir) if f.endswith(".tif")])
-                    _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt"), [ os.path.join(winter_dir, f) for f in os.listdir(winter_dir) if f.endswith(".tif")])
-                S2spring_file = os.path.join(rawEE_map_root, region, "S2Aspring_out.vrt")
-                S2summer_file = os.path.join(rawEE_map_root, region, "S2Asummer_out.vrt")
-                S2autumn_file = os.path.join(rawEE_map_root, region, "S2Aautumn_out.vrt")
-                S2winter_file = os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt")
+            if not os.path.exists(os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt")): 
+                print("VRT {} file do not exist".format(os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt")))
 
-        else:
-            S2spring_file = os.path.join(covar_root,  os.path.join("S21Cspring", region +"_S21Cspring.tif"))
-            S2summer_file = os.path.join(covar_root,  os.path.join("S21Csummer", region +"_S21Csummer.tif"))
-            S2autumn_file = os.path.join(covar_root,  os.path.join("S21Cautumn", region +"_S21Cautumn.tif"))
-            S2winter_file = os.path.join(covar_root,  os.path.join("S21Cwinter", region +"_S21Cwinter.tif"))
+                from osgeo import gdal
+                _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Aspring_out.vrt"), [ os.path.join(spring_dir, f) for f in os.listdir(spring_dir) if f.endswith(".tif")])
+                _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Asummer_out.vrt"), [ os.path.join(summer_dir, f) for f in os.listdir(summer_dir) if f.endswith(".tif")])
+                _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Aautumn_out.vrt"), [ os.path.join(autumn_dir, f) for f in os.listdir(autumn_dir) if f.endswith(".tif")])
+                _ = gdal.BuildVRT(os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt"), [ os.path.join(winter_dir, f) for f in os.listdir(winter_dir) if f.endswith(".tif")])
+
+            S2spring_file = os.path.join(rawEE_map_root, region, "S2Aspring_out.vrt")
+            S2summer_file = os.path.join(rawEE_map_root, region, "S2Asummer_out.vrt")
+            S2autumn_file = os.path.join(rawEE_map_root, region, "S2Aautumn_out.vrt")
+            S2winter_file = os.path.join(rawEE_map_root, region, "S2Awinter_out.vrt")
 
         self.S2_file = {0: S2spring_file, 1: S2summer_file, 2: S2autumn_file, 3: S2winter_file}
         self.S2_file = {0: S2spring_file, 1: S2summer_file, 2: S2autumn_file, 3: S2winter_file}
+
         self.season_dict = {0: "spring", 1: "summer", 2: "autumn", 3: "winter"}
         self.inv_season_dict = {v: k for k, v in self.season_dict.items()}
         self.VIIRS_file = os.path.join(covar_root,  os.path.join("viirs", region +"_viirs.tif"))
@@ -276,8 +284,7 @@ class Population_Dataset(Dataset):
                 self.gbuildings_segmentation_file = os.path.join(pop_gbuildings_path, region, "Gbuildings_" + region + "_segmentation.tif")
                 self.gbuildings_counts_file = os.path.join(pop_gbuildings_path, region, "Gbuildings_" + region + "_counts.tif")
             self.gbuildings = True 
-
-        print("Setup done!")
+ 
         print("---------------------")
 
     # delete the dataset
