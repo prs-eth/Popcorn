@@ -36,7 +36,7 @@
 
 ## News 📰
 
-- 5th May 2024: We published the training code. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
+- 8th May 2024: We published the training code. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 20th March 2024: We published the evaluation code and the pretrained models. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 17th March 2024: Website is live. <a href="https://popcorn-population.github.io/" target="_blank">Visit Website</a>
 
