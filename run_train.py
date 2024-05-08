@@ -114,8 +114,7 @@ class Trainer:
 
         with tqdm(range(self.info["epoch"], self.args.num_epochs), leave=True) as tnr:
             tnr.set_postfix(training_loss=np.nan, validation_loss=np.nan, best_validation_loss=np.nan)
-            for _ in tnr:               
-                # self.test_target(save=True)
+            for _ in tnr:
 
                 self.train_epoch(tnr)
                 torch.cuda.empty_cache()
@@ -445,7 +444,7 @@ class Trainer:
     def save_model(self, prefix=''):
         """
         Input:
-            prefix: string to prepend to the filenam
+            prefix: string to prepend to the filename
         """
         torch.save({
             'model': self.model.state_dict(),
