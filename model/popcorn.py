@@ -158,10 +158,7 @@ class POPCORN(nn.Module):
         headin = torch.cat(middlefeatures, dim=1)
 
         # forward the head 
-        if sparse:
-            out = self.sparse_module_forward(headin, sparsity_mask, self.head, out_channels=2)[:,0]
-        else:
-            out = self.head(headin)[:,0]
+        out = self.head(headin)[:,0]
 
         # Population map and total count
         if self.occupancymodel:
@@ -290,41 +287,6 @@ class POPCORN(nn.Module):
         return score
     
 
-    def sparse_module_forward(self, inp: torch.Tensor, mask: torch.Tensor,
-                       module: callable, out_channels=2) -> torch.Tensor:
-        """
-        Description:
-            - Perform a forward pass with a module on a sparse input
-        Input:
-            - inp (torch.Tensor): input data
-            - mask (torch.Tensor): mask of the input data
-            - module (torch.nn.Module): module to apply
-            - out_channels (int): number of output channels
-        Output:
-            - out (torch.Tensor): output data
-        """
-        # Validate input shape
-        if len(inp.shape) != 4:
-            raise ValueError("Input tensor must have shape (batch_size, channels, height, width)")
-
-        # bring everything together
-        batch_size, channels, height, width = inp.shape
-        inp_flat = inp.permute(1,0,2,3).contiguous().view(channels, -1, 1)
-
-        # flatten mask
-        mask_flat = mask.view(-1)
-        
-        # initialize the output
-        out_flat = torch.zeros((out_channels, batch_size*height*width,1), device=inp.device, dtype=inp.dtype)
-
-        # form together the output
-        out_flat[ :, mask_flat] = module(inp_flat[:, mask_flat])
-        
-        # reshape the output
-        out = out_flat.view(out_channels, batch_size, height, width).permute(1,0,2,3)
-
-        return out
-    
 
     def get_sparsity_mask(self, inputs: torch.Tensor, sparse_unet=False) -> torch.Tensor:
         """
