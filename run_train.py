@@ -21,7 +21,6 @@ import wandb
  
 import gc
 
-# from arguments import train_parser
 from arguments.train import parser as train_parser
 from data.PopulationDataset import Population_Dataset, Population_Dataset_collate_fn
 from utils.losses import get_loss, r2
