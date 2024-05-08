@@ -88,6 +88,8 @@ source PopMapEnv/bin/activate
 pip install -r requirements.txt
 pip install torch==2.1.1 torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cu118
 ```
+Code was tested on Ubuntu 22.04 LTS, 64GB RAM, NVIDIA GeForce RTX 3090 Ti.
+
 If you plan to use the preprocessing tools in this reposiotry, you also need to install GDAL. An easy way to install GDAL without sudo access is as follows:
  - download the [gdal-3.4.1 binary](https://gdal.org/download.html), and extract it.
  - install GDAL using these commands (this might take some time):
@@ -165,25 +167,25 @@ The outputs will be written into the folder of the first model. `/path/to/model1
 
 Train Switzerland:
 ```
-python run_train.py -S2 -NIR -S1 -treg che -tregtrain che --seed 1600 -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.2267 --save-dir <your/save/dir>
+python run_train.py -S2 -NIR -S1 -treg che -tregtrain che -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.2267
 ```
 
 Train Rwanda projected census 2020:
 ```
-python run_train.py -S2 -NIR -S1 -treg rwa -tregtrain rwa --seed 1600 -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407 --save-dir <your/save/dir>
+python run_train.py -S2 -NIR -S1 -treg rwa -tregtrain rwa -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407
 ```
 
 Train Puerto Rico:
 ```
-python run_train.py -S2 -NIR -S1 -treg pricp2 -tregtrain pricp2 --seed 1600 -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.4119 --save-dir <your/save/dir>
+python run_train.py -S2 -NIR -S1 -treg pricp2 -tregtrain pricp2 -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.4119
 ```
 
 Uganda:
 ```
-python run_train.py -S2 -NIR -S1 -treg uga -tregtrain rwa2022 --seed 1600 -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407  --save-dir <your/save/dir>
+python run_train.py -S2 -NIR -S1 -treg uga -tregtrain rwa2022 -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407
 ```
 
-For the results in the paper, we trained the Bag-of-POPCORN with parameter settings `--seed {1600,1601,1602,1603,1604}` 
+For the results in the paper, we trained the Bag-of-POPCORN with parameter settings `--seed {1600,1601,1602,1603,1604}`, default is `1600`.
 
 
 ## Recompute the dataset 🖥️

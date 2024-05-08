@@ -2,7 +2,45 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run eval.py",
+            "name": "Run train.py, RWA",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run_train.py",
+            "args": [
+                "-S2",
+                "-NIR",
+                "-S1",
+                "-treg", "rwa",
+                "-tregtrain", "rwa",
+                "--seed", "1600",
+                "-occmodel",
+                "-wd", "0.00001",
+                "-senbuilds",
+                "-pret",
+                "--biasinit", "0.9407", 
+            ],
+            "console": "integratedTerminal"
+        },{
+            "name": "Run train.py, PRI",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run_train.py",
+            "args": [
+                "-S2",
+                "-NIR",
+                "-S1",
+                "-treg", "rwa",
+                "-tregtrain", "rwa",
+                "--seed", "1600",
+                "-occmodel",
+                "-wd", "0.0000005",
+                "-senbuilds",
+                "-pret",
+                "--biasinit", "0.4119", 
+            ],
+            "console": "integratedTerminal"
+        },{
+            "name": "Run eval.py, RWA",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/run_eval.py",
@@ -22,6 +60,6 @@
                     "./checkpoints/POPCORN_RWA_checkpoints/model4/last_model.pth",
                     "./checkpoints/POPCORN_RWA_checkpoints/model5/last_model.pth", 
             ], 
-        }
+        },
     ]
 }

@@ -69,16 +69,13 @@ class POPCORN(nn.Module):
         unet_out = self.S1*stage1feats + self.S2*stage1feats
         head_input_dim += unet_out
                     
-        num_params_sar = sum(p.numel() for p in self.unetmodel.sar_stream.parameters() if p.requires_grad)
-        print("trainable DDA SAR: ", num_params_sar)
-
-        num_params_opt = sum(p.numel() for p in self.unetmodel.optical_stream.parameters() if p.requires_grad)
-        print("trainable DDA OPT: ", num_params_opt)
+        num_params_sar = sum(p.numel() for p in self.unetmodel.sar_stream.parameters() if p.requires_grad)  
+        num_params_opt = sum(p.numel() for p in self.unetmodel.optical_stream.parameters() if p.requires_grad) 
 
         # remove the discriminator from checkpoint, as it is not needed in this version of the code
         self.unetmodel.num_params = sum(p.numel() for p in self.unetmodel.parameters() if p.requires_grad)
 
-        # Build the head
+        # Build the head, a simple 1x1 convolutional layer network
         h = 64
         self.head = nn.Sequential(
             nn.Conv2d(head_input_dim, h, kernel_size=1, padding=0), nn.ReLU(inplace=True),
@@ -90,23 +87,18 @@ class POPCORN(nn.Module):
         # lift the bias of the head to avoid the risk of dying ReLU
         self.head[-1].bias.data = biasinit * torch.ones(2)
 
-        # print size of the embedder and head network
-        self.num_params = 0
-        if hasattr(self, "embedder"):
-            print("Embedder: ",sum(p.numel() for p in self.embedder.parameters() if p.requires_grad)) 
-            self.num_params += sum(p.numel() for p in self.embedder.parameters() if p.requires_grad)
-        print("Head: ",sum(p.numel() for p in self.head.parameters() if p.requires_grad))
+        # print size of the network
+        self.num_params = 0 
         self.num_params += sum(p.numel() for p in self.head.parameters() if p.requires_grad)
         self.num_params += self.unetmodel.num_params if self.unetmodel is not None else 0
 
-        # define urban extractor, which is again a dual stream unet
-        print("Loading urban extractor")
+        # define urban extractor, which is again a dual stream unet 
         self.building_extractor, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device="cuda")
         self.building_extractor = self.building_extractor.cuda()
 
 
     def forward(self, inputs, train=False, padding=True, return_features=True,
-                encoder_no_grad=False, unet_no_grad=False):
+                encoder_no_grad=False, unet_no_grad=False, sparse=False):
         """
         Forward pass of the model
         Assumptions:
@@ -124,6 +116,11 @@ class POPCORN(nn.Module):
         
         aux = {}
         middlefeatures = []
+
+        if sparse:
+            # get sparsity mask
+            sparsity_mask, ratio = self.get_sparsity_mask(inputs)
+
 
         # Forward the main model
         if self.unetmodel is not None: 
@@ -147,7 +144,12 @@ class POPCORN(nn.Module):
                     X[:, 3:4]], # S2_NIR
                 dim=1)
             
-            X = self.unetmodel(X, alpha=0, encoder_no_grad=encoder_no_grad, return_features=True, S1=self.S1, S2=self.S2)
+            if unet_no_grad:
+                with torch.no_grad():
+                    self.unetmodel.eval()
+                    X = self.unetmodel(X, alpha=0, encoder_no_grad=encoder_no_grad, return_features=True, S1=self.S1, S2=self.S2)
+            else:
+                X = self.unetmodel(X, alpha=0, encoder_no_grad=encoder_no_grad, return_features=True, S1=self.S1, S2=self.S2)
 
             # revert padding
             X = self.revert_padding(X, (px1,px2,py1,py2))
@@ -284,3 +286,58 @@ class POPCORN(nn.Module):
 
         return score
     
+
+    def get_sparsity_mask(self, inputs: torch.Tensor, sparse_unet=False) -> torch.Tensor:
+        """
+        Description:
+            - Get the sparsity mask for the input data
+        Input:
+            - input (dict): input dict with conent "building_counts", "admin_mask", "census_idx"
+        Output:
+            - sparsity_mask (torch.Tensor): sparsity mask
+        """
+        # get sparsity mask
+
+        if sparse_unet:
+            # building_sparsity_mask = (inputs["building_counts"][:,0]>0.0001) 
+            building_sparsity_mask = (inputs["building_counts"][:,0]>0.001000) 
+            sub = 250
+            xindices = torch.ones(building_sparsity_mask.shape[1]).multinomial(num_samples=min(sub,building_sparsity_mask.shape[1]), replacement=False).sort()[0]
+            yindices = torch.ones(building_sparsity_mask.shape[2]).multinomial(num_samples=min(sub,building_sparsity_mask.shape[2]), replacement=False).sort()[0]
+            subsample_mask = torch.zeros_like(building_sparsity_mask)
+            subsample_mask[:, xindices.unsqueeze(1), yindices] = 1
+
+            subsample_mask = subsample_mask * (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+            subsample_mask_empty = subsample_mask * ~building_sparsity_mask
+            mask_empty = (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1)) * ~building_sparsity_mask
+
+            # calculate undersampling ratio
+            ratio = mask_empty.sum((1,2)) / ( subsample_mask_empty.sum((1,2)) + 1e-5)
+            del mask_empty, subsample_mask
+
+            sparsity_mask = building_sparsity_mask.clone()
+            sparsity_mask[:, xindices.unsqueeze(1), yindices] = 1
+            
+            # clip mask to the administrative region
+            sparsity_mask *= (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+
+            return sparsity_mask, ratio
+
+        else:
+            if self.occupancymodel:
+                sparsity_mask = (inputs["building_counts"][:,0]>0) * (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+            else:
+                sparsity_mask = (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+            sub = 60
+            xindices = torch.ones(sparsity_mask.shape[1]).multinomial(num_samples=min(sub,sparsity_mask.shape[1]), replacement=False).sort()[0]
+            yindices = torch.ones(sparsity_mask.shape[2]).multinomial(num_samples=min(sub,sparsity_mask.shape[2]), replacement=False).sort()[0]
+            sparsity_mask[:, xindices.unsqueeze(1), yindices] = 1
+
+            # clip mask to the administrative region
+            sparsity_mask *= (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+
+            if sparsity_mask.sum()==0:
+                sparsity_mask = (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
+
+            return sparsity_mask, None
+        

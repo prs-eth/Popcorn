@@ -59,6 +59,8 @@ if large_file_path is None:
 pop_gbuildings_path = os.path.join(data_path_aux, os.path.join("PopMapData", os.path.join("raw", "GoogleBuildings")))
 print("pop_gbuildings_path", pop_gbuildings_path)
 
+src_path = os.path.dirname(os.path.dirname(__file__))
+config_path = os.path.join(os.path.join(src_path, 'data'), 'config')
 
 # Definitions of where to find the census data and the boundaries of the target areas
 datalocations = {

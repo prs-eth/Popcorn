@@ -99,8 +99,7 @@ class UNet(nn.Module):
             out_dim = down_topo[idx + 1] if is_not_last_layer else down_topo[idx]  # last layer
 
             layer = Down(in_dim, out_dim, DoubleConv)
-
-            # print(f'down{idx + 1}: in {in_dim}, out {out_dim}')
+ 
             down_dict[f'down{idx + 1}'] = layer
             up_topo.append(out_dim)
         self.down_seq = nn.ModuleDict(down_dict)
@@ -114,8 +113,7 @@ class UNet(nn.Module):
             out_dim = up_topo[x2_idx]
 
             layer = Up(in_dim, out_dim, DoubleConv)
-
-            # print(f'up{idx + 1}: in {in_dim}, out {out_dim}')
+ 
             up_dict[f'up{idx + 1}'] = layer
 
         self.up_seq = nn.ModuleDict(up_dict)
@@ -126,16 +124,16 @@ class UNet(nn.Module):
         if encoder_no_grad:
             with torch.no_grad():
                 x1 = self.inc(x)
-
                 inputs = [x1]
+
                 # Downward U:
                 for layer in self.down_seq.values():
                     out = layer(inputs[-1])
                     inputs.append(out)
-        else:  
+        else:
             x1 = self.inc(x)
-
             inputs = [x1]
+
             # Downward U:
             for layer in self.down_seq.values():
                 out = layer(inputs[-1])

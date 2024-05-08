@@ -6,3 +6,4 @@ vis
 *__pycache__
 wandb/
 checkpoints/
+outputs
