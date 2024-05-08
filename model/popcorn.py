@@ -157,8 +157,11 @@ class POPCORN(nn.Module):
 
         headin = torch.cat(middlefeatures, dim=1)
 
-        # forward the head
-        out = self.head(headin)[:,0]
+        # forward the head 
+        if sparse:
+            out = self.sparse_module_forward(headin, sparsity_mask, self.head, out_channels=2)[:,0]
+        else:
+            out = self.head(headin)[:,0]
 
         # Population map and total count
         if self.occupancymodel:
