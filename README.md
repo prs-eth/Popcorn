@@ -168,8 +168,6 @@ The outputs will be written into the folder of the first model. `/path/to/model1
 
 ## Training 🏋️‍♂️ 
 
-> Note: ⚙️ Release of the `train.py` is coming soon.
-
 Train Switzerland:
 ```
 python run_train.py -S2 -NIR -S1 -treg che -tregtrain che -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.2267
