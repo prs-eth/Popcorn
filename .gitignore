@@ -5,5 +5,5 @@ proj*
 vis
 *__pycache__
 wandb/
-checkpoints/
+# checkpoints/
 outputs
