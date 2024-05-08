@@ -79,6 +79,8 @@ The model operates at the full Sentinel-1/-2 resolution, i.e., its output has a 
 
 ### Environment 🐍
 
+#### Model training and testing
+
 Instructions on how to install the project or library (Tested on Linux)
 
 Set up the base environment like this:
@@ -89,6 +91,8 @@ pip install -r requirements.txt
 pip install torch==2.1.1 torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cu118
 ```
 Code was tested on Ubuntu 22.04 LTS, 64GB RAM, NVIDIA GeForce RTX 3090 Ti.
+
+#### Dataset reproducability
 
 If you plan to use the preprocessing tools in this reposiotry, you also need to install GDAL. An easy way to install GDAL without sudo access is as follows:
  - download the [gdal-3.4.1 binary](https://gdal.org/download.html), and extract it.
