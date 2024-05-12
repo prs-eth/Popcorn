@@ -36,6 +36,7 @@
 
 ## News 📰
 
+- 8th May 2024: We published the training code. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 20th March 2024: We published the evaluation code and the pretrained models. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 17th March 2024: Website is live. <a href="https://popcorn-population.github.io/" target="_blank">Visit Website</a>
 
@@ -166,8 +167,6 @@ python run_eval.py -occmodel -senbuilds -S2 -NIR -S1 -treg <inference dataset na
 The outputs will be written into the folder of the first model. `/path/to/model1/last_model.pth` in the case above
 
 ## Training 🏋️‍♂️ 
-
-> Note: ⚙️ Release of the `train.py` is coming soon.
 
 Train Switzerland:
 ```
