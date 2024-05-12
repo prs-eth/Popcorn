@@ -169,17 +169,19 @@ The outputs will be written into the folder of the first model. `/path/to/model1
 
 ## Training 🏋️‍♂️ 
 
-Train Switzerland:
+> Note: The training script loads large chunks of data per sample. We recommend to use SSDs for data storing to avoid bottlenecks. 
+
+Train Switzerland (Estimated training time: ~15h):
 ```
 python run_train.py -S2 -NIR -S1 -treg che -tregtrain che -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.2267
 ```
 
-Train Rwanda projected census 2020:
+Train Rwanda projected census 2020 (Estimated training time: ~8h):
 ```
 python run_train.py -S2 -NIR -S1 -treg rwa -tregtrain rwa -occmodel -wd 0.00001 -senbuilds -pret --biasinit 0.9407
 ```
 
-Train Puerto Rico:
+Train Puerto Rico (Estimated training time: ~6h):
 ```
 python run_train.py -S2 -NIR -S1 -treg pricp2 -tregtrain pricp2 -occmodel -wd 0.0000005 -senbuilds -pret --biasinit 0.4119
 ```
