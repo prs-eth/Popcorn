@@ -30,7 +30,7 @@
                 "-NIR",
                 "-S1",
                 "-treg", "rwa",
-                "-tregtrain", "rwa",
+                "-tregtrain", "rwa", 
                 "--seed", "1600",
                 "-occmodel",
                 "-wd", "0.0000005",
