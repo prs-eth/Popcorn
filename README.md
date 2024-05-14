@@ -27,6 +27,7 @@
   <a href="https://arxiv.org/abs/2311.14006"><img src="https://img.shields.io/badge/arXiv-PDF-b31b1b" alt="Paper"></a>
   <a href="https://ee-nandometzger.projects.earthengine.app/view/popcornv1-rwa"><img src="https://img.shields.io/badge/%20Earth%20Engine-Demo-blue" alt="EE_Demo"></a>
   <a href="https://code.earthengine.google.com/f90c3d3a77ec4dcfeb645457a87ddf48"><img src="https://img.shields.io/badge/%20Earth%20Engine-Data-blue" alt="EE_Code"></a>
+  <a href="https://code.earthengine.google.com/f90c3d3a77ec4dcfeb645457a87ddf48"><img src="https://img.shields.io/badge/%20GIS%20friendly%20.tif-Data-yellow" alt="EE_Code"></a>
   <a href="https://github.com/jvargasmu/population_estimation"><img src="https://img.shields.io/badge/%20Previous%20Model-POMELO-green" alt="EE_Code"></a>
 </p>
 
@@ -36,6 +37,7 @@
 
 ## News 📰
 
+- 14th May 2024: Predictions for Switzerland (`che`), Rwanda (`rwa`), and Puerto Rico (`pricp2`) are now downloadable in `.tif` format. <a href="https://drive.google.com/drive/folders/1BEIrYL-n1lLQ_vvna5r0HRESpLaQMOfT?usp=drive_link" target="_blank">Download the data here</a>
 - 12th May 2024: We updated the code base with our sparse head implementation. All experiments can now be run with <24GB GPU Memory. See [#4](https://github.com/prs-eth/Popcorn/pull/4).
 - 8th May 2024: We published the training code. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
 - 20th March 2024: We published the evaluation code and the pretrained models. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
