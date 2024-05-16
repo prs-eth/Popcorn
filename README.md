@@ -27,7 +27,7 @@
   <a href="https://arxiv.org/abs/2311.14006"><img src="https://img.shields.io/badge/arXiv-PDF-b31b1b" alt="Paper"></a>
   <a href="https://ee-nandometzger.projects.earthengine.app/view/popcornv1-rwa"><img src="https://img.shields.io/badge/%20Earth%20Engine-Demo-blue" alt="EE_Demo"></a>
   <a href="https://code.earthengine.google.com/f90c3d3a77ec4dcfeb645457a87ddf48"><img src="https://img.shields.io/badge/%20Earth%20Engine-Data-blue" alt="EE_Code"></a>
-  <a href="https://code.earthengine.google.com/f90c3d3a77ec4dcfeb645457a87ddf48"><img src="https://img.shields.io/badge/%20GIS%20friendly%20.tif-Data-yellow" alt="EE_Code"></a>
+  <a href="https://drive.google.com/drive/folders/1BEIrYL-n1lLQ_vvna5r0HRESpLaQMOfT?usp=drive_link"><img src="https://img.shields.io/badge/%20GIS%20friendly%20.tif-Data-yellow" alt="EE_Code"></a>
   <a href="https://github.com/jvargasmu/population_estimation"><img src="https://img.shields.io/badge/%20Previous%20Model-POMELO-green" alt="EE_Code"></a>
 </p>
 
