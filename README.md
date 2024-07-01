@@ -67,9 +67,9 @@ var popDensity = ee.Image("projects/ee-nandometzger/assets/POPCORNv3");
   <img src="imgs/ee_demo.gif" alt="EE DEMO" width="600"/>
 </p>
 
-
-
+<!-- 
 ![Bunia Time Series](imgs/series_bunia.jpg)
+-->
 
 ## Methodology 🧠🛰️💻
 
