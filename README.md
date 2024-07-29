@@ -85,7 +85,7 @@ The model operates at the full Sentinel-1/-2 resolution, i.e., its output has a 
 
 #### Model training and testing
 
-Instructions on how to install the project or library (Tested on Linux)
+Instructions on how to install the project or library (tested with Python 3.10.12)
 
 Set up the base environment like this:
 ```bash
