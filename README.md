@@ -37,6 +37,7 @@
 
 ## News 📰
 
+- 31st July 2024: We uploaded downloading scripts for single frames for the GEE and also the Sentinel-Hub platform. Moreover, we also included the inference-only scripts. 
 - 14th May 2024: Predictions for Switzerland (`che`), Rwanda (`rwa`), and Puerto Rico (`pricp2`) are now downloadable in `.tif` format. <a href="https://drive.google.com/drive/folders/1BEIrYL-n1lLQ_vvna5r0HRESpLaQMOfT?usp=drive_link" target="_blank">Download the data here</a>
 - 12th May 2024: We updated the code base with our sparse head implementation. All experiments can now be run with <24GB GPU Memory. See [#4](https://github.com/prs-eth/Popcorn/pull/4).
 - 8th May 2024: We published the training code. <a href="https://github.com/prs-eth/popcorn/" target="_blank">View Code on GitHub</a>
