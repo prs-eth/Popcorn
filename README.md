@@ -259,13 +259,13 @@ We recommend tools like Filezilla for easy exploration of the WorldPop FTP serve
 
 ```bash
 python utils/02_preprocess_rwa_shapefile.py \
-  --hd_regions_path /scratch2/metzgern/Downloads/rwa_adm_2006_nisr_wgs1984_20181002_shp/rwa_adm3_2006_NISR_WGS1984_20181002.shp \
-  --wp_regions_path /scratch2/metzgern/Downloads/RWA/Subnational/Shapefile/ \
-  --census_data_path /scratch2/metzgern/HAC/data/PopMapData/raw/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv \
-  --kigali_census_data_path /scratch2/metzgern/Downloads/RWA/pop_growth_dataset/ancillary_data/population_grid_level_2020_kigali.tiff \
-  --output_path /scratch2/metzgern/HAC/data/PopMapData/processed/rwa/ \
+  --hd_regions_path /<path to data>/rwa_adm_2006_nisr_wgs1984_20181002_shp/rwa_adm3_2006_NISR_WGS1984_20181002.shp \
+  --wp_regions_path /<path to data>/RWA/Subnational/Shapefile/ \
+  --census_data_path <path to data>/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv \
+  --kigali_census_data_path <path to data>/pop_growth_dataset/ancillary_data/population_grid_level_2020_kigali.tiff \
+  --output_path /<path to data>/PopMapData/processed/rwa/ \
   --target_col P_2020 \
-  --template_file /scratch3/metzgern/HAC/data/PopMapData/merged/EE/rwa2022/S2Aspring/rwa2022_S2Aspring.tif 
+  --template_file /<path to data>/PopMapData/merged/EE/rwa2022/S2Aspring/rwa2022_S2Aspring.tif 
 ```
 
 
