@@ -54,5 +54,3 @@ tzdata==2023.3
 urllib3==1.26.13
 wandb==0.16.0
 yacs==0.1.8
-fiona
-geopandas
