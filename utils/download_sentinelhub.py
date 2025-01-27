@@ -1,13 +1,14 @@
+"""
+Project: 🍿POPCORN: High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2 🌍🛰️
+Author: Estelle Zemp, 2024
+"""
+
 import os
-import glob
 from sentinelhub import (
     CRS,
     BBox,
     DataCollection,
-    DownloadRequest,
     MimeType,
-    MosaickingOrder,
-    SentinelHubDownloadClient,
     SentinelHubRequest,
     SHConfig,
     bbox_to_dimensions,

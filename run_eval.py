@@ -8,16 +8,11 @@ import argparse
 from collections import defaultdict
 import time
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import wandb
-
-import rasterio
-from rasterio.windows import Window
-from shutil import copyfile
 
 from arguments.eval import parser as eval_parser
 from data.PopulationDataset import Population_Dataset
@@ -27,7 +22,7 @@ from model.get_model import get_model_kwargs, model_dict
 from utils.utils import load_json, apply_transformations_and_normalize
 from utils.constants import config_path
 
-from utils.constants import  overlap, testlevels, testlevels_eval
+from utils.constants import  overlap, testlevels_eval
 from utils.constants import inference_patch_size as ips
 
 

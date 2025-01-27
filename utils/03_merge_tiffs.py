@@ -1,3 +1,7 @@
+"""
+Project: 🍿POPCORN: High-resolution Population Maps Derived from Sentinel-1 and Sentinel-2 🌍🛰️
+Nando Metzger, 2024
+"""
 
 
 import argparse
