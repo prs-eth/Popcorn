@@ -92,14 +92,20 @@ Set up the base environment like this:
 ```bash
 python -m venv PopMapEnv
 source PopMapEnv/bin/activate
+pip install torch torchvision #https://pytorch.org/get-started/locally/
 pip install -r requirements.txt
-pip install torch==2.1.1 torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cu118
 ```
 Code was tested on Ubuntu 22.04 LTS, 64GB RAM, NVIDIA GeForce RTX 3090 Ti.
 
 #### Dataset reproducability
 
-If you plan to use the preprocessing tools in this reposiotry, you also need to install GDAL. An easy way to install GDAL without sudo access is as follows:
+If you plan to use the preprocessing tools in this reposiotry, you also need additional packages:
+
+```bash
+pip install -r requirements.txt -r requirements+.txt
+```
+
+ Moreover, you need to compile GDAL. An easy way to install GDAL without sudo access is as follows:
  - download the [gdal-3.4.1 binary](https://gdal.org/download.html), and extract it.
  - install GDAL using these commands (this might take some time):
 ```bash
@@ -246,7 +252,22 @@ python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/uga <path to dat
 
 ### 4. Census files preprocessing
 
->  ⚙️ Release of the census preprocessing scripts is coming soon.
+#### Rwanda
+ Download the additional data: 1. [Census Boundaries](https://data.humdata.org/dataset/cod-ab-rwa), 2. [Kigali Census Data](https://zenodo.org/record/7712047) 3. [WorldPop Census data from their FTP server](https://sdi.worldpop.org/wpdata) path: `/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv` 4. [WorldPop Subnational boarders from their FTP server](https://sdi.worldpop.org/wpdata) `/GIS/Mastergrid/Global_2000_2020/RWA/Subnational/Shapefile/`
+ 
+We recommend tools like Filezilla for easy exploration of the WorldPop FTP server in case their server paths change in the future.
+
+```bash
+python utils/02_preprocess_rwa_shapefile.py \
+  --hd_regions_path /scratch2/metzgern/Downloads/rwa_adm_2006_nisr_wgs1984_20181002_shp/rwa_adm3_2006_NISR_WGS1984_20181002.shp \
+  --wp_regions_path /scratch2/metzgern/Downloads/RWA/Subnational/Shapefile/ \
+  --census_data_path /scratch2/metzgern/HAC/data/PopMapData/raw/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv \
+  --kigali_census_data_path /scratch2/metzgern/Downloads/RWA/pop_growth_dataset/ancillary_data/population_grid_level_2020_kigali.tiff \
+  --output_path /scratch2/metzgern/HAC/data/PopMapData/processed/rwa/ \
+  --target_col P_2020 \
+  --template_file /scratch3/metzgern/HAC/data/PopMapData/merged/EE/rwa2022/S2Aspring/rwa2022_S2Aspring.tif 
+```
+
 
 ## Citation 🎓
 
