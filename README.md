@@ -253,7 +253,11 @@ python utils/03_merge_tiffs.py <path to data>/PopMapData/raw/EE/uga <path to dat
 ### 4. Census files preprocessing
 
 #### Rwanda
- Download the additional data: 1. [Census Boundaries](https://data.humdata.org/dataset/cod-ab-rwa), 2. [Kigali Census Data](https://zenodo.org/record/7712047) 3. [WorldPop Census data from their FTP server](https://sdi.worldpop.org/wpdata) path: `/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv` 4. [WorldPop Subnational boarders from their FTP server](https://sdi.worldpop.org/wpdata) `/GIS/Mastergrid/Global_2000_2020/RWA/Subnational/Shapefile/`
+ Download the additional data:
+ 1. [Coarse Census Boundaries](https://data.humdata.org/dataset/cod-ab-rwa)
+ 2. [Finegrained Kigali Census Data](https://zenodo.org/record/7712047)
+ 3. [WorldPop Census data from their FTP server](https://sdi.worldpop.org/wpdata) path: `/GIS/Population/Global_2000_2020/CensusTables/rwa_population_2000_2020.csv`
+ 4. [WorldPop Subnational boarders from their FTP server](https://sdi.worldpop.org/wpdata) `/GIS/Mastergrid/Global_2000_2020/RWA/Subnational/Shapefile/`
  
 We recommend tools like Filezilla for easy exploration of the WorldPop FTP server in case their server paths change in the future.
 
