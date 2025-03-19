@@ -364,8 +364,8 @@ class POPCORN(nn.Module):
             else:
                 sparsity_mask = (inputs["admin_mask"]==inputs["census_idx"].view(-1,1,1))
             sub = 60
-            xindices = torch.ones(sparsity_mask.shape[1]).multinomial(num_samples=min(sub,sparsity_mask.shape[1]), replacement=False).sort()[0]
-            yindices = torch.ones(sparsity_mask.shape[2]).multinomial(num_samples=min(sub,sparsity_mask.shape[2]), replacement=False).sort()[0]
+            xindices = torch.ones(sparsity_mask.shape[1]).multinomial(num_samples=min(sub,sparsity_mask.shape[1]), replacement=False).sort()[0].to(sparsity_mask.device)
+            yindices = torch.ones(sparsity_mask.shape[2]).multinomial(num_samples=min(sub,sparsity_mask.shape[2]), replacement=False).sort()[0].to(sparsity_mask.device)
             sparsity_mask[:, xindices.unsqueeze(1), yindices] = 1
 
             # clip mask to the administrative region
