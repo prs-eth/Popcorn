@@ -92,8 +92,6 @@ Set up the base environment like this:
 ```bash
 python -m venv PopMapEnv
 source PopMapEnv/bin/activate
-pip install torch torchvision #https://pytorch.org/get-started/locally/
-# OR
 pip install torch==2.5.0 torchvision==0.20.0 --index-url https://download.pytorch.org/whl/cu124
 pip install -r requirements.txt
 ```
