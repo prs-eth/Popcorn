@@ -34,9 +34,12 @@
 
 > #### 💡 **TL;DR**
 > **POPCORN** is a lightweight population mapping method using free satellite images and minimal data, surpassing existing accuracy and providing interpretable maps for mapping populations in data-scarce regions.
+> 
+> **Update [Jan 2026]:** Check out **[Bourbon 🥃](https://github.com/nandometzger/bourbon)**, which achieves higher accuracy while relying exclusively on Sentinel-2!
 
 ## News 📰
 
+- 22nd Jan 2026: **Bourbon follow-up is out!** 🥃 Introducing [Bourbon](https://github.com/nandometzger/bourbon), a new state-of-the-art model that achieves **better accuracy** than Popcorn using **only Sentinel-2** imagery!
 - 31st July 2024: We uploaded downloading scripts for single frames for the GEE and also the Sentinel-Hub platform. Moreover, we also included the inference-only scripts. 
 - 14th May 2024: Predictions for Switzerland (`che`), Rwanda (`rwa`), and Puerto Rico (`pricp2`) are now downloadable in `.tif` format. <a href="https://drive.google.com/drive/folders/1BEIrYL-n1lLQ_vvna5r0HRESpLaQMOfT?usp=drive_link" target="_blank">Download the data here</a>
 - 12th May 2024: We updated the code base with our sparse head implementation. All experiments can now be run with <24GB GPU Memory. See [#4](https://github.com/prs-eth/Popcorn/pull/4).
