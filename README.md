@@ -34,7 +34,7 @@
 
 > #### 💡 **TL;DR**
 > **POPCORN** is a lightweight population mapping method using free satellite images and minimal data, surpassing existing accuracy and providing interpretable maps for mapping populations in data-scarce regions.
-> 
+
 > **Update [Jan 2026]:** Check out **[Bourbon 🥃](https://github.com/nandometzger/bourbon)**, which achieves higher accuracy while relying exclusively on Sentinel-2!
 
 ## News 📰
