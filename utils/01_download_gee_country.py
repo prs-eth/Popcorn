@@ -235,24 +235,9 @@ def submit_s2job(s2_sr_mosaic, description, name, exportarea):
 
 
 # New function to download the Sentine2 data
-def export_cloud_free_sen2(season, dates, roi_id, roi, debug=0, S2type="S2"):
+def export_cloud_free_sen2(season, dates, roi_id, roi, debug=0, S2type="S2", url_mode=False):
     """
     Export cloud free Sentinel-2 data for a given season and region of interest
-    Parameters
-    ----------
-    season : str
-        Season to download data for
-    dates : list
-        List of dates to download data for
-    roi_id : str
-        Region of interest ID
-    roi : ee.Geometry
-        Region of interest
-    debug : int
-        Debug level
-    -------
-    Returns
-        None
     """
 
     if S2type == "S2":
@@ -282,7 +267,10 @@ def export_cloud_free_sen2(season, dates, roi_id, roi, debug=0, S2type="S2"):
 
     # Define a function to mask clouds using the probability threshold.
     def mask_clouds(img):
-        clouds = ee.Image(img.get('cloud_mask')).select('probability')
+        cloud_mask_img = ee.Image(img.get('cloud_mask'))
+        if cloud_mask_img is None:
+             return img
+        clouds = cloud_mask_img.select('probability')
         is_not_cloud = clouds.lt(65)
         return img.updateMask(is_not_cloud)
 
@@ -292,6 +280,21 @@ def export_cloud_free_sen2(season, dates, roi_id, roi, debug=0, S2type="S2"):
     # Get the median of each pixel for the time period.
     cloud_free = img_c.median()
     filename = f"{season}_{roi_id}"
+
+    if url_mode:
+        try:
+            url = cloud_free.select(bands).getDownloadUrl({
+                'scale': 10,
+                'format': "GEOTIFF", 
+                'region': roi,
+                'crs': 'EPSG:4326',
+                'maxPixels':80000000000,
+            })
+            download_tile(url, filename + ".tif", roi_id)
+            return url
+        except Exception as e:
+            print(e)
+            return None
 
     
     # Export the image to Google Drive.
@@ -425,25 +428,16 @@ def export_gbuildings(roi, filename, folder, confidence_min=0.0, scale=10, crs='
     start(task)
 
 
-def download(minx, miny, maxx, maxy, name):
+def download(minx, miny, maxx, maxy, name, url_mode=False):
     """
     Function to download the data from Google Earth Engine to Drive.
-    Inputs:
-    - minx, miny, maxx, maxy (float): coordinates of the bounding box.
-    - name (str): name of the file to download.
-    Returns:
-    - None. (the files are downloaded to Drive instead)
     """
 
     exportarea = { "type": "Polygon",  "coordinates": [[[maxx, miny], [maxx, maxy], [minx, maxy], [minx, miny], [maxx, miny]]]  }
     exportarea = ee.Geometry.Polygon(exportarea["coordinates"]) 
+    
+    os.makedirs(name, exist_ok=True)
  
-    S1 = False
-    S2 = False
-    VIIRS = False
-    GoogleBuildings = False
-    S2A = False
-
     S1 = True
     S2A = True
     # VIIRS = True
@@ -454,14 +448,14 @@ def download(minx, miny, maxx, maxy, name):
 
         for season in seasons:
             start_date, finish_date = config[f'Sen2{season}']
-            export_S1_tile(season, (start_date, finish_date), f"S1{season}_" + name, exportarea, name, url_mode=False)
+            export_S1_tile(season, (start_date, finish_date), f"S1{season}_" + name, exportarea, name, url_mode=url_mode)
 
     if S2A:
         ########################### Processing Sentinel 2 Level 2A #############################################
 
         for season in seasons:
             start_date, finish_date = config[f'Sen2{season}']
-            export_cloud_free_sen2(f"S2A{season}", (start_date, finish_date), name, exportarea, S2type="S2_SR_HARMONIZED")
+            export_cloud_free_sen2(f"S2A{season}", (start_date, finish_date), name, exportarea, S2type="S2_SR_HARMONIZED", url_mode=url_mode)
      
 
     if GoogleBuildings:
@@ -482,9 +476,10 @@ def main():
     parser.add_argument("maxx", type=float)
     parser.add_argument("maxy", type=float) 
     parser.add_argument("name", type=str) 
+    parser.add_argument("--url_mode", action="store_true")
     args = parser.parse_args()
 
-    download(args.minx, args.miny, args.maxx, args.maxy, args.name)
+    download(args.minx, args.miny, args.maxx, args.maxy, args.name, url_mode=args.url_mode)
 
 
 if __name__ == "__main__":

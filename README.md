@@ -40,6 +40,7 @@
 
 ## News 📰
 
+- 22nd Jan 2026: **Microsoft Planetary Computer (MPC) Pipeline!** 🍿 We added a new download pipeline that does not require Earth Engine authentication. See section [2.2](#22-download-raw-data-microsoft-planetary-computer).
 - 22nd Jan 2026: **Bourbon follow-up is out!** 🥃 Introducing [Bourbon](https://github.com/nandometzger/bourbon), a new state-of-the-art model that achieves **better accuracy** than Popcorn using **only Sentinel-2** imagery!
 - 31st July 2024: We uploaded downloading scripts for single frames for the GEE and also the Sentinel-Hub platform. Moreover, we also included the inference-only scripts. 
 - 14th May 2024: Predictions for Switzerland (`che`), Rwanda (`rwa`), and Puerto Rico (`pricp2`) are now downloadable in `.tif` format. <a href="https://drive.google.com/drive/folders/1BEIrYL-n1lLQ_vvna5r0HRESpLaQMOfT?usp=drive_link" target="_blank">Download the data here</a>
@@ -88,26 +89,18 @@ The model operates at the full Sentinel-1/-2 resolution, i.e., its output has a 
 
 ### Environment 🐍
 
-#### Model training and testing
-
-Instructions on how to install the project or library (tested with Python 3.10.12)
-
-Set up the base environment like this:
+#### Complete Setup (Simple Installation)
+If you want to install everything (model, GEE, and MPC download tools) at once:
 ```bash
-python -m venv PopMapEnv
-source PopMapEnv/bin/activate
-pip install torch==2.5.0 torchvision==0.20.0 --index-url https://download.pytorch.org/whl/cu124
-pip install -r requirements.txt
+python -m venv PopcornEnv
+source PopcornEnv/bin/activate
+pip install -r requirements_all.txt
 ```
-Code was tested on Ubuntu 22.04 LTS, 64GB RAM, NVIDIA GeForce RTX 3090 Ti.
 
-#### Dataset reproducability
+#### Detailed Environment Setup
+...
 
-If you plan to use the preprocessing tools in this reposiotry, you also need additional packages:
-
-```bash
-pip install -r requirements.txt -r requirements+.txt
-```
+> Note: For the Microsoft Planetary Computer download pipeline, we recommend a separate environment as described in section [2.2](#22-download-raw-data-microsoft-planetary-computer).
 
  Moreover, you need to compile GDAL. An easy way to install GDAL without sudo access is as follows:
  - download the [gdal-3.4.1 binary](https://gdal.org/download.html), and extract it.
@@ -231,15 +224,46 @@ gcloud auth application-default login --no-browser
 This will generate another gcloud command like `gcloud auth application-default login --remote-bootstrap="...."`. Copy this command and paste it into your *local* terminal.
 Accept that you are bootstrapping glcoud to a trusted machine, and the Earth Engine login window in your browser should be prompted. After successful browser authentification, your local terminal should provide an output `https://localhost:8085/...`. Copy and paste this line into your remote terminal. 
 
-### 2. Download raw data
-```
+### 2.1 Download raw data (Google Earth Engine)
+
+> **Note:** Requires GEE authentication. See section below.
+
+```bash
 python utils/01_download_gee_country.py 28.782241 -2.903950 30.961654 -0.994897 rwa
 python utils/01_download_gee_country.py 5.855713 45.759859 10.656738 47.864774 che
 python utils/01_download_gee_country.py -67.282031 17.874492 -65.205615 18.522873 pricp2
 python utils/01_download_gee_country.py 29.492798 -1.554375 35.095825 4.291636 uga
 ```
-The resulting files will appear in your google drive.
+The resulting files will appear in your Google Drive.
 
+### 2.2 Download raw data (Microsoft Planetary Computer)
+
+Alternatively, you can use the Microsoft Planetary Computer (MPC) pipeline, which does **not** require any authentication for public datasets.
+
+**Highlights of the MPC Pipeline:**
+- **Efficient**: Uses `odc-stac` and `dask` for parallel, memory-efficient processing of country-scale data.
+- **Optimized**: Sentinel-2 outputs are cast to `uint16` and compressed with `LZW` to minimize disk space (up to 4x reduction compared to raw float32).
+- **Live Reporting**: Displays estimated file sizes and real-time processing/download speeds (MB/s).
+
+We recommend using a dedicated virtual environment:
+```bash
+python3 -m venv mpc_env
+source mpc_env/bin/activate
+pip install -r requirements_all.txt
+```
+
+Then run the download script for your region of interest:
+```bash
+# Rwanda
+python utils/01_download_mpc_country.py 28.782241 -2.903950 30.961654 -0.994897 rwa
+# Switzerland
+python utils/01_download_mpc_country.py 5.855713 45.759859 10.656738 47.864774 che
+# Puerto Rico
+python utils/01_download_mpc_country.py -67.282031 17.874492 -65.205615 18.522873 pricp2
+# Uganda
+python utils/01_download_mpc_country.py 29.492798 -1.554375 35.095825 4.291636 uga
+```
+The resulting files will be saved locally in the specified folder.
 
 ### 3. Merging Google Earth Engine outputs
 

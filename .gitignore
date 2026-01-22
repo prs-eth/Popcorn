@@ -6,4 +6,15 @@ vis
 *__pycache__
 wandb/
 # checkpoints/
-outputs
+outputsmpc_env/
+rwa/
+kigali_small/
+comp_test_live/
+comp_test_speed/
+rwa_test_large/
+rwa2/
+test_mpc/
+comp_mpc/
+comp_mpc_big/
+test_gee/
+comp_gee/
