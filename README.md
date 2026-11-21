@@ -199,6 +199,27 @@ python run_train.py -S2 -NIR -S1 -treg uga -tregtrain rwa2022 -occmodel -wd 0.00
 
 For the results in the paper, we trained the Bag-of-POPCORN with parameter settings `--seed {1600,1601,1602,1603,1604}`, default is `1600`.
 
+### Faster data loading
+
+The merged covariates in the data release (`merged/EE/<region>/S1<season>/` and `S2A<season>/`) are uncompressed GeoTIFFs stored in 1-row strips, with S1 as float64. Training reads one window per census unit, and with 1-row strips GDAL reads every full raster row that the window touches. For a typical Rwanda unit (about 850 x 850 pixels) that is about 0.5 GB from disk for about 17 MB of pixels. On a fast local disk this may go unnoticed; on a slower disk, data loading rather than the GPU sets the training speed. There are two ways around it:
+
+- **Read only the bytes you need.** Set GDAL's `GTIFF_DIRECT_IO=YES` when you start training, e.g. `GTIFF_DIRECT_IO=YES python run_train.py ...`. No new files are needed.
+- **Make tiled, compressed copies.** `tools/tile_covariates.py` writes 256x256-tiled, DEFLATE-compressed copies of a region's covariates (S1 as float32, the type the dataloader converts it to anyway) and links the census files from `processed/<region>` next to them. Each copy is checked to decode to exactly the values the dataloader reads from the original. Then point the data root in `utils/constants.py` (`large_file_paths`) to the new folder.
+  ```
+  python tools/tile_covariates.py --src <folder that contains PopMapData> --dst <new folder> --region rwa
+  ```
+  For Rwanda, the copies take 23.9 GB instead of 49.5 GB.
+
+Measured on one setup, a laptop reading the Rwanda release from an external SSD over USB 2.0 (about 40 MB/s), for the S1 and S2 windows of one census unit:
+
+| Covariate files | One process, per unit (736 to 1207 rows) | 6 dataloader workers, wall time per unit |
+|---|---|---|
+| Released files | 10.6 to 24.2 s | 23.6 s |
+| Released files, `GTIFF_DIRECT_IO=YES` | 2.6 to 9.0 s | 4.9 s |
+| Tiled copies | 0.6 to 1.1 s | 0.9 s |
+
+All three return the same values (compared on the single-process windows; the tool also checks every pixel of each copy). Making the Rwanda copies took 41 minutes on the same setup.
+
 
 ## Recompute the dataset 🖥️
 

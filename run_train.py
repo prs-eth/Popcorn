@@ -35,7 +35,6 @@ from utils.constants import inference_patch_size as ips
 from utils.utils import NumberList
 from utils.device import get_device, empty_cache, memory_used_gb
 
-torch.autograd.set_detect_anomaly(True)
 
 
 class Trainer:
@@ -111,7 +110,6 @@ class Trainer:
         self.target_buffer = NumberList(300)
 
         with tqdm(range(self.info["epoch"], self.args.num_epochs), leave=True) as tnr:
-            tnr.set_postfix(training_loss=np.nan, validation_loss=np.nan, best_validation_loss=np.nan)
 
             for _ in tnr:
 
@@ -160,7 +158,6 @@ class Trainer:
         num_buildings, num_people = 0, 0
 
         with tqdm(dataloader, leave=False, total=len(dataloader)) as inner_tnr:
-            inner_tnr.set_postfix(training_loss=np.nan)
 
             # iterate over samples of one epoch
             for i, sample in enumerate(inner_tnr):
@@ -475,6 +472,9 @@ class Trainer:
 if __name__ == '__main__':
     args = train_parser.parse_args()
     print(train_parser.format_values())
+
+    # off by default: anomaly detection slows down every training step
+    torch.autograd.set_detect_anomaly(args.detect_anomaly)
 
     trainer = Trainer(args)
 
