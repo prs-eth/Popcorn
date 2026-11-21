@@ -20,6 +20,7 @@ from typing import Dict, Tuple
 
 from utils.constants import pop_map_root, pop_map_covariates, pop_gbuildings_path, rawEE_map_root, skip_indices
 from utils.constants import datalocations
+from utils.device import get_device, empty_cache
 
 def load_json(file):
     with open(file, 'r') as f:
@@ -694,12 +695,12 @@ class Population_Dataset(Dataset):
         census = pd.read_csv(census_file)
 
         if gpu_mode: 
-            pred = pred.cuda()
-            boundary = boundary#.cuda() 
+            pred = pred.to(get_device())
+            boundary = boundary#.to(get_device()) 
 
             # initialize more efficient version
-            census_pred_i = -torch.ones(len(census), dtype=torch.float32).cuda()
-            census_i = -torch.ones(len(census), dtype=torch.float32).cuda()
+            census_pred_i = -torch.ones(len(census), dtype=torch.float32).to(get_device())
+            census_i = -torch.ones(len(census), dtype=torch.float32).to(get_device())
 
             # iterate over census regions and get totals
             for i, (cidx,bbox) in tqdm(enumerate(zip(census["idx"], census["bbox"])), total=len(census), disable=False, leave=False):
@@ -708,7 +709,7 @@ class Population_Dataset(Dataset):
 
                 # append the predicted census and the true census
                 xmin, xmax, ymin, ymax = tuple(map(int, bbox.strip('()').strip('[]').split(',')))
-                census_pred_i[i] = pred[xmin:xmax, ymin:ymax].cuda()[boundary[xmin:xmax, ymin:ymax].cuda()==cidx].to(torch.float32).sum()
+                census_pred_i[i] = pred[xmin:xmax, ymin:ymax].to(get_device())[boundary[xmin:xmax, ymin:ymax].to(get_device())==cidx].to(torch.float32).sum()
                 census_i[i] = census["POP20"][i]
 
         else:
@@ -787,9 +788,9 @@ class Population_Dataset(Dataset):
             #relaltive residuals
             residuals_rel = torch.zeros_like(pred, dtype=torch.float32) 
             if gpu_mode:
-                pop20 = torch.tensor(census["POP20"]).cuda().to(torch.float32)
-                pix_count = torch.tensor(census["count"]).cuda().to(torch.float32)
-                census_pred = census_pred_i.cuda().to(torch.float32)
+                pop20 = torch.tensor(census["POP20"]).to(torch.float32).to(get_device())
+                pix_count = torch.tensor(census["count"]).to(torch.float32).to(get_device())
+                census_pred = census_pred_i.to(torch.float32).to(get_device())
             else:
                 pop20 = torch.tensor(census["POP20"]).to(torch.float32)
                 pix_count = torch.tensor(census["count"]).to(torch.float32)
@@ -814,7 +815,7 @@ class Population_Dataset(Dataset):
             self.save(residuals_rel, details_to, "_residuals_rel")
         
         del boundary, pred
-        torch.cuda.empty_cache()
+        empty_cache()
 
         assert census_pred_i.shape[0] == len(census_i), "census_pred and census have different lengths"
         return census_pred_i, census_i
