@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from utils.device import get_device
+
 
 def get_criterion(loss_type, negative_weight: float = 1, positive_weight: float = 1):
 
@@ -13,7 +15,7 @@ def get_criterion(loss_type, negative_weight: float = 1, positive_weight: float 
         criterion = nn.BCEWithLogitsLoss()
     elif loss_type == 'CrossEntropyLoss':
         balance_weight = [negative_weight, positive_weight]
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = get_device()
         balance_weight = torch.tensor(balance_weight).float().to(device)
         criterion = nn.CrossEntropyLoss(weight=balance_weight)
     elif loss_type == 'SoftDiceLoss':
