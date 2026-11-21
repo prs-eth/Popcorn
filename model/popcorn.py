@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 from model.DDA_model.utils.networks import load_checkpoint
 from utils.constants import dda_cfg, stage1feats, stage2feats
+from utils.device import get_device, empty_cache
 
 class POPCORN(nn.Module):
     '''
@@ -54,7 +55,7 @@ class POPCORN(nn.Module):
             self.S1, self.S2 = False, True
         
         ## load weights from checkpoint
-        self.unetmodel, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device="cuda")
+        self.unetmodel, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device=get_device())
 
         if not pretrained:
             # initialize weights randomly
@@ -93,8 +94,8 @@ class POPCORN(nn.Module):
         self.num_params += self.unetmodel.num_params if self.unetmodel is not None else 0
 
         # define urban extractor, which is again a dual stream unet 
-        self.building_extractor, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device="cuda")
-        self.building_extractor = self.building_extractor.cuda()
+        self.building_extractor, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device=get_device())
+        self.building_extractor = self.building_extractor.to(get_device())
 
 
     def forward(self, inputs, train=False, padding=True, return_features=True,
@@ -112,7 +113,7 @@ class POPCORN(nn.Module):
         if "building_counts" not in inputs.keys() or self.sentinelbuildings:
             with torch.no_grad():
                 inputs["building_counts"]  = self.create_building_score(inputs)
-            torch.cuda.empty_cache()
+            empty_cache()
         
         aux = {}
         middlefeatures = []
