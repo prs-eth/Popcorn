@@ -24,6 +24,7 @@ from utils.constants import config_path
 
 from utils.constants import  overlap, testlevels_eval
 from utils.constants import inference_patch_size as ips
+from utils.device import get_device
 
 
 class Trainer:
@@ -49,7 +50,7 @@ class Trainer:
         self.model = []
         for _ in args.resume: 
             model_kwargs = get_model_kwargs(args, args.model)
-            model = model_dict[args.model](**model_kwargs).cuda()
+            model = model_dict[args.model](**model_kwargs).to(get_device())
             self.model.append(model) 
         
         # wandb config
@@ -99,20 +100,20 @@ class Trainer:
                     mask = sample["mask"][0].bool()
 
                     # get the output with a forward pass
-                    popdense = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device="cuda")
-                    scale = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device="cuda")
-                    popdense_squared = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device="cuda")
-                    scale_squared = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device="cuda")
+                    popdense = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device=get_device())
+                    scale = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device=get_device())
+                    popdense_squared = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device=get_device())
+                    scale_squared = torch.zeros((len(self.model), ips, ips), dtype=torch.float32, device=get_device())
 
                     # Evaluate each model in the ensemble
                     for i, model in enumerate(self.model):
                         this_output = model(sample, padding=False)
-                        popdense[i] = this_output["popdensemap"][0].cuda()
-                        popdense_squared[i] = this_output["popdensemap"][0].to(torch.float32).cuda()**2
+                        popdense[i] = this_output["popdensemap"][0].to(get_device())
+                        popdense_squared[i] = this_output["popdensemap"][0].to(torch.float32).to(get_device())**2
                         if "scale" in this_output.keys():
                             if this_output["scale"] is not None:
-                                scale[i] = this_output["scale"][0].cuda()
-                                scale_squared[i] = this_output["scale"][0].to(torch.float32).cuda()**2
+                                scale[i] = this_output["scale"][0].to(get_device())
+                                scale_squared[i] = this_output["scale"][0].to(torch.float32).to(get_device())**2
                     
                     output = {
                         "popdensemap": popdense.sum(dim=0, keepdim=True),
@@ -120,8 +121,8 @@ class Trainer:
                     }
                     if "scale" in this_output.keys():
                         if this_output["scale"] is not None:
-                            output["scale"] = scale.cuda().sum(dim=0, keepdim=True)
-                            output["scale_squared"] = scale_squared.cuda().sum(dim=0, keepdim=True)
+                            output["scale"] = scale.to(get_device()).sum(dim=0, keepdim=True)
+                            output["scale_squared"] = scale_squared.to(get_device()).sum(dim=0, keepdim=True)
                     
                     # save predictions to large map
                     output_map[xl:xl+ips, yl:yl+ips][mask.cpu()] += output["popdensemap"][0][mask].cpu().to(torch.float32)
@@ -173,7 +174,7 @@ class Trainer:
                     # convert map to census
                     details_path = os.path.join(self.experiment_folder, "{}_{}".format(testdataloader.dataset.region, level)) if full else None
                     census_pred, census_gt = testdataloader.dataset.convert_popmap_to_census(output_map, gpu_mode=gpu_mode, level=level, details_to=details_path)
-                    this_metrics = get_test_metrics(census_pred, census_gt.float().cuda(), tag="MainCensus_{}_{}".format(testdataloader.dataset.region, level))
+                    this_metrics = get_test_metrics(census_pred, census_gt.float().to(get_device()), tag="MainCensus_{}_{}".format(testdataloader.dataset.region, level))
                     print(this_metrics)
                     self.target_test_stats = {**self.target_test_stats, **this_metrics}
 
@@ -193,7 +194,7 @@ class Trainer:
                     print("Evaluating level: ", level)
                     details_path = os.path.join(self.experiment_folder, "{}_{}_adj".format(testdataloader.dataset.region, level)) if full else None
                     census_pred, census_gt = testdataloader.dataset.convert_popmap_to_census(output_map_adj, gpu_mode=gpu_mode, level=level, details_to=details_path)
-                    test_stats_adj = get_test_metrics(census_pred, census_gt.float().cuda(), tag="AdjCensus_{}_{}".format(testdataloader.dataset.region, level))
+                    test_stats_adj = get_test_metrics(census_pred, census_gt.float().to(get_device()), tag="AdjCensus_{}_{}".format(testdataloader.dataset.region, level))
                     print(test_stats_adj)
 
                     self.target_test_stats = {**self.target_test_stats,
@@ -249,7 +250,7 @@ class Trainer:
             raise RuntimeError(f'No checkpoint found at \'{path}\'')
 
         # load checkpoint
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(path, map_location=get_device())
         self.model[j].load_state_dict(checkpoint['model']) 
         self.info["epoch"] = checkpoint['epoch']
         self.info["iter"] = checkpoint['iter']
