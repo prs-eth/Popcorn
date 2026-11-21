@@ -12,50 +12,59 @@ from utils.utils import Namespace
 inference_patch_size = 2048
 overlap = 128
 
-# data folder
+# data folder: set POPCORN_DATA to the folder that contains PopMapData/.
+# Without it, the original cluster paths below are tried in order.
+data_root_env = os.environ.get("POPCORN_DATA")
+
+large_file_path = data_root_env
 large_file_paths = [
         "/scratch2/metzgern/HAC/data",
         "/scratch/metzgern/HAC/data",
         "/cluster/work/igp_psr/metzgern/HAC/data",
         "/cluster/scratch/metzgern"
 ]
-for name in large_file_paths:
-    if os.path.isdir(name):
-        large_file_path = name
 if large_file_path is None:
-    raise Exception("No data folder found")
+    for name in large_file_paths:
+        if os.path.isdir(name):
+            large_file_path = name
+if large_file_path is None:
+    raise Exception("No data folder found, set POPCORN_DATA to the folder that contains PopMapData/")
 pop_map_root = os.path.join(large_file_path, os.path.join("PopMapData", "processed"))
-pop_map_root_large = os.path.join("/scratch2/metzgern/HAC/data", os.path.join("PopMapData", "processed"))
+pop_map_root_large = os.path.join(data_root_env or "/scratch2/metzgern/HAC/data", os.path.join("PopMapData", "processed"))
 pop_map_covariates = os.path.join(large_file_path, os.path.join("PopMapData", os.path.join("merged", "EE")))
 print("pop_map_root", pop_map_root)
 
 # raw data folder
+raw_file_path = data_root_env
 raw_file_paths = [
         "/scratch2/metzgern/HAC/data",
         "/scratch/metzgern/HAC/data",
         "/cluster/work/igp_psr/metzgern/HAC/data",
         "/cluster/scratch/metzgern"
 ]
-for name in raw_file_paths:
-    if os.path.isdir(name):
-        raw_file_path = name
 if raw_file_path is None:
-    raise Exception("No data folder found")
+    for name in raw_file_paths:
+        if os.path.isdir(name):
+            raw_file_path = name
+if raw_file_path is None:
+    raise Exception("No data folder found, set POPCORN_DATA to the folder that contains PopMapData/")
 raw_map_root = os.path.join(raw_file_path, os.path.join("PopMapData", "raw"))
 rawEE_map_root = os.path.join(raw_map_root, "EE")
 print("rawEE_map_root", rawEE_map_root)
 
 # google buildings data folder
+data_path_aux = data_root_env
 data_paths_aux = [
         "/scratch/metzgern/HAC/data",
         "/scratch2/metzgern/HAC/data",
         "/cluster/work/igp_psr/metzgern/HAC/data",
 ]
-for name in data_paths_aux:
-    if os.path.isdir(name):
-        data_path_aux = name
-if large_file_path is None:
-    raise Exception("No data folder found")
+if data_path_aux is None:
+    for name in data_paths_aux:
+        if os.path.isdir(name):
+            data_path_aux = name
+if data_path_aux is None:
+    raise Exception("No data folder found, set POPCORN_DATA to the folder that contains PopMapData/")
 pop_gbuildings_path = os.path.join(data_path_aux, os.path.join("PopMapData", os.path.join("raw", "GoogleBuildings")))
 print("pop_gbuildings_path", pop_gbuildings_path)
 
