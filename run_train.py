@@ -34,7 +34,6 @@ from utils.constants import testlevels, overlap
 from utils.constants import inference_patch_size as ips
 from utils.utils import NumberList
 
-torch.autograd.set_detect_anomaly(True)
 
 import nvidia_smi
 nvidia_smi.nvmlInit()
@@ -477,6 +476,9 @@ class Trainer:
 if __name__ == '__main__':
     args = train_parser.parse_args()
     print(train_parser.format_values())
+
+    # off by default: anomaly detection slows down every training step
+    torch.autograd.set_detect_anomaly(args.detect_anomaly)
 
     trainer = Trainer(args)
 
