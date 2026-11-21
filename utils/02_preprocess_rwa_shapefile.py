@@ -18,6 +18,11 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.warp import transform_bounds
 from rasterio import Affine
 
+try:
+    from utils.device import get_device
+except ImportError:  # run as `python utils/02_preprocess_rwa_shapefile.py`
+    from device import get_device
+
 
 
 def process(hd_regions_path, wp_regions_path,
@@ -137,7 +142,7 @@ def process(hd_regions_path, wp_regions_path,
 
     burned = torch.tensor(burned, dtype=torch.int32)
     if gpu_mode:
-        burned = burned.cuda()
+        burned = burned.to(get_device())
 
     hd_regions["bbox"] = ""
     hd_regions["count"] = 0
@@ -170,7 +175,7 @@ def process(hd_regions_path, wp_regions_path,
         densities[burned==row.idx] = row.pop_count/row.count
         totals[burned==row.idx] = row.pop_count
 
-    if burned.is_cuda:
+    if burned.device.type != "cpu":
         burned = burned.cpu()
         densities = densities.cpu()
         totals = totals.cpu()
@@ -286,7 +291,7 @@ def process(hd_regions_path, wp_regions_path,
         
         # turn on the gpu mode
         if gpu_mode:
-            kigali_census_map_ids_fine = torch.tensor(kigali_census_map_ids_fine, dtype=torch.int32).cuda()
+            kigali_census_map_ids_fine = torch.tensor(kigali_census_map_ids_fine, dtype=torch.int32).to(get_device())
         else:
             kigali_census_map_ids_fine = torch.tensor(kigali_census_map_ids_fine, dtype=torch.int32)
         
@@ -321,7 +326,7 @@ def process(hd_regions_path, wp_regions_path,
             
             thisdb[["idx", "POP20", "bbox", "count"]].to_csv(this_censusfile)
 
-        if kigali_census_map_ids_fine.is_cuda:
+        if kigali_census_map_ids_fine.device.type != "cpu":
             kigali_census_map_ids_fine = kigali_census_map_ids_fine.cpu()
 
         print("Done with Kigali resolution", res)

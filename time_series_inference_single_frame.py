@@ -17,6 +17,7 @@ from utils.plot import plot_2dmatrix
 
 from utils.constants import dda_cfg, stage1feats, stage2feats
 from model.DDA_model.utils.networks import load_checkpoint
+from utils.device import get_device
 
 
 targetregion = "gaza"
@@ -194,7 +195,7 @@ def rearrange_channels(input_array):
     return input_array
 
 # Function to load data into memory
-def load_to_memory(infodict, device="cuda"):
+def load_to_memory(infodict, device=None):
     """
     Load data into memory
     Input:
@@ -202,6 +203,7 @@ def load_to_memory(infodict, device="cuda"):
     Output:
         datadict: dictionary with the data loaded into memory
     """
+    device = get_device() if device is None else device
     datadict = {}
 
     for frame_name, frame_info in tqdm(infodict.items()):
@@ -331,10 +333,10 @@ if __name__=="__main__":
     datadict = load_to_memory(infodict, device="cpu")
 
     # load model
-    unetmodel, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device="cuda", no_disc=True)
+    unetmodel, _, _ = load_checkpoint(epoch=30, cfg=dda_cfg, device=get_device(), no_disc=True)
     unetmodel.eval()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
 
     # inference
     for frame_name, frame_data in tqdm(datadict.items()):
