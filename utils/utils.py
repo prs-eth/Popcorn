@@ -18,18 +18,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 
+from utils.device import get_device, seed_device
+
 
 def to_cuda_inplace(sample, half=False, spare=[]):
+    # name kept for the callers; moves tensors to get_device() (CUDA, MPS or CPU)
     for key, val in sample.items():
         if isinstance(val, torch.Tensor):
-            sample[key] = val.cuda()
+            sample[key] = val.to(get_device())
             if half and val.dtype == torch.float32 and key not in spare:
                 sample[key] = sample[key].half()
         elif isinstance(val, list):
             new_val = []
             for e in val:
                 if isinstance(e, torch.Tensor):
-                    e = e.cuda()
+                    e = e.to(get_device())
                     if half and val.dtype == torch.float32 and key not in spare:
                         e = e.half()
                     new_val.append(e)
@@ -52,8 +55,7 @@ def seed_all(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed) # cpu
-    torch.cuda.manual_seed(seed) # gpu
-    torch.cuda.manual_seed_all(seed) # multi-gpu
+    seed_device(seed) # gpu / multi-gpu, skipped without CUDA
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -112,17 +114,17 @@ def apply_normalize(indata, dataset_stats):
     # S2
     if "S2" in indata:
         if indata["S2"].shape[1] == 4: 
-            indata["S2"] = ((indata["S2"].permute((0,2,3,1)) - dataset_stats["sen2springNIR"]['mean'].cuda() ) / dataset_stats["sen2springNIR"]['std'].cuda()).permute((0,3,1,2))
+            indata["S2"] = ((indata["S2"].permute((0,2,3,1)) - dataset_stats["sen2springNIR"]['mean'].to(get_device()) ) / dataset_stats["sen2springNIR"]['std'].to(get_device())).permute((0,3,1,2))
         else:  
-            indata["S2"] = ((indata["S2"].permute((0,2,3,1)) - dataset_stats["sen2spring"]['mean'].cuda() ) / dataset_stats["sen2spring"]['std'].cuda()).permute((0,3,1,2))
+            indata["S2"] = ((indata["S2"].permute((0,2,3,1)) - dataset_stats["sen2spring"]['mean'].to(get_device()) ) / dataset_stats["sen2spring"]['std'].to(get_device())).permute((0,3,1,2))
 
     # S1
     if "S1" in indata: 
-        indata["S1"] = ((indata["S1"].permute((0,2,3,1)) - dataset_stats["sen1"]['mean'].cuda() ) / dataset_stats["sen1"]['std'].cuda()).permute((0,3,1,2))
+        indata["S1"] = ((indata["S1"].permute((0,2,3,1)) - dataset_stats["sen1"]['mean'].to(get_device()) ) / dataset_stats["sen1"]['std'].to(get_device())).permute((0,3,1,2))
 
     # VIIRS
     if "VIIRS" in indata: 
-        indata["VIIRS"] = ((indata["VIIRS"].permute((0,3,1,2)) - dataset_stats["viirs"]['mean'].cuda() ) / dataset_stats["viirs"]['std'].cuda()).permute((0,3,1,2))
+        indata["VIIRS"] = ((indata["VIIRS"].permute((0,3,1,2)) - dataset_stats["viirs"]['mean'].to(get_device()) ) / dataset_stats["viirs"]['std'].to(get_device())).permute((0,3,1,2))
 
     return indata
 

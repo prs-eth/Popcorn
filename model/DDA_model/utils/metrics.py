@@ -106,8 +106,8 @@ def IoU(y_true: torch.Tensor, y_pred: torch.Tensor, dim: int):
     return TP / denom
 
 def boundary_IoU(y_true: torch.Tensor, y_pred: torch.Tensor):
-    gt_boundary = kornia.morphology.dilation(y_true, torch.ones((3,3)).cuda())
-    pred_boundary = kornia.morphology.dilation(y_pred, torch.ones((3,3)).cuda())
+    gt_boundary = kornia.morphology.dilation(y_true, torch.ones((3,3), device=y_true.device))
+    pred_boundary = kornia.morphology.dilation(y_pred, torch.ones((3,3), device=y_true.device))
     IoU_boundary = IoU(gt_boundary, pred_boundary,dim=None)
     return IoU_boundary
 
@@ -135,22 +135,22 @@ def ssim(y_true: torch.Tensor, y_pred: torch.Tensor, windowsize=7):
     return torch.mean(ssim)
 
 def closed_IoU(y_true: torch.Tensor, y_pred: torch.Tensor):
-    gt = kornia.morphology.closing(y_true, torch.ones((3,3)).cuda())
-    pred = kornia.morphology.closing(y_pred, torch.ones((3,3)).cuda())
+    gt = kornia.morphology.closing(y_true, torch.ones((3,3), device=y_true.device))
+    pred = kornia.morphology.closing(y_pred, torch.ones((3,3), device=y_true.device))
     return IoU(gt, pred,dim=None)
 
 def opened_IoU(y_true: torch.Tensor, y_pred: torch.Tensor):
-    gt = kornia.morphology.opening(y_true, torch.ones((3,3)).cuda())
-    pred = kornia.morphology.opening(y_pred, torch.ones((3,3)).cuda())
+    gt = kornia.morphology.opening(y_true, torch.ones((3,3), device=y_true.device))
+    pred = kornia.morphology.opening(y_pred, torch.ones((3,3), device=y_true.device))
     return IoU(gt, pred,dim=None)
 
 def gradient_IoU(y_true: torch.Tensor, y_pred: torch.Tensor):
-    kernel = torch.Tensor([[0,-1,0],[-1,4,-1],[0,-1,0]]).cuda()
+    kernel = torch.Tensor([[0,-1,0],[-1,4,-1],[0,-1,0]]).to(y_true.device)
     gt_grad = kornia.morphology.gradient(y_true, kernel)
     pred_grad = kornia.morphology.gradient(y_pred, kernel)
         
-    gt = kornia.morphology.dilation(gt_grad, torch.ones((3,3)).cuda())
-    pred = kornia.morphology.dilation(pred_grad, torch.ones((3,3)).cuda())
+    gt = kornia.morphology.dilation(gt_grad, torch.ones((3,3), device=y_true.device))
+    pred = kornia.morphology.dilation(pred_grad, torch.ones((3,3), device=y_true.device))
 
     return IoU(gt, pred,dim=None)
 

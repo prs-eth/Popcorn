@@ -33,11 +33,9 @@ from utils.constants import config_path
 from utils.constants import testlevels, overlap
 from utils.constants import inference_patch_size as ips
 from utils.utils import NumberList
+from utils.device import get_device, empty_cache, memory_used_gb
 
 torch.autograd.set_detect_anomaly(True)
-
-import nvidia_smi
-nvidia_smi.nvmlInit()
 
 
 class Trainer:
@@ -58,7 +56,7 @@ class Trainer:
         
         # define architecture
         model_kwargs = get_model_kwargs(args, args.model)
-        self.model = model_dict[args.model](**model_kwargs).cuda()
+        self.model = model_dict[args.model](**model_kwargs).to(get_device())
         
         # set random seed after model initialization to ensure reproducibility of training pipline
         seed_all(args.seed+1)
@@ -118,7 +116,7 @@ class Trainer:
             for _ in tnr:
 
                 self.train_epoch(tnr)
-                torch.cuda.empty_cache()
+                empty_cache()
 
                 if self.args.save_model in ['last', 'both']:
                     self.save_model('last')
@@ -127,11 +125,11 @@ class Trainer:
                 if (self.info["epoch"] + 1) % self.args.val_every_n_epochs == 0:
                     if self.args.weak_validation:
                         self.validate_weak()
-                        torch.cuda.empty_cache()
+                        empty_cache()
 
                 if (self.info["epoch"] + 1) % (self.args.val_every_n_epochs) == 0:
                     self.test_target(save=True)
-                    torch.cuda.empty_cache()
+                    empty_cache()
 
                     if self.args.save_model in ['last', 'both']:
                         self.save_model('last')
@@ -152,10 +150,8 @@ class Trainer:
         # set model to train mode
         self.model.train()
 
-        # get GPU memory usage
-        handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-        info = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
-        train_stats["gpu_used"] = info.used / 1e9 # in GB 
+        # get GPU memory usage (NVML on CUDA, Metal driver memory on MPS)
+        train_stats["gpu_used"] = memory_used_gb() # in GB 
 
         # check if we are in unsupervised or supervised mode and adjust dataloader accordingly
         dataloader = self.dataloaders['train'] 
@@ -246,7 +242,7 @@ class Trainer:
                 gc.collect()
                 
                 # clear GPU cache
-                torch.cuda.empty_cache()
+                empty_cache()
 
                 # update info
                 self.info["iter"] += 1 
@@ -307,7 +303,7 @@ class Trainer:
                 # compute metrics
                 pred = torch.cat(pred); gt = torch.cat(gt)
                 self.valweak_stats = { **self.valweak_stats,
-                                       **get_test_metrics(pred, gt.float().cuda(), tag="MainCensus_{}_{}".format(valdataloader.dataset.region, self.args.train_level))  }
+                                       **get_test_metrics(pred, gt.float().to(get_device()), tag="MainCensus_{}_{}".format(valdataloader.dataset.region, self.args.train_level))  }
 
             wandb.log({**{k + '/val': v for k, v in self.valweak_stats.items()}, **self.info}, self.info["iter"])
 
@@ -363,7 +359,7 @@ class Trainer:
                 for level in testlevels[testdataloader.dataset.region]:
                     census_pred, census_gt = testdataloader.dataset.convert_popmap_to_census(output_map, gpu_mode=True, level=level)
                     self.target_test_stats = {**self.target_test_stats,
-                                              **get_test_metrics(census_pred, census_gt.float().cuda(), tag="MainCensus_{}_{}".format(testdataloader.dataset.region, level))}
+                                              **get_test_metrics(census_pred, census_gt.float().to(get_device()), tag="MainCensus_{}_{}".format(testdataloader.dataset.region, level))}
 
             wandb.log({**{k + '/targettest': v for k, v in self.target_test_stats.items()}, **self.info}, self.info["iter"])
 
@@ -465,7 +461,7 @@ class Trainer:
             raise RuntimeError(f'No checkpoint found at \'{path}\'')
 
         # load checkpoint
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(path, map_location=get_device())
         self.model.load_state_dict(checkpoint['model'])
         if load_optimizer:
             self.optimizer.load_state_dict(checkpoint['optimizer'])

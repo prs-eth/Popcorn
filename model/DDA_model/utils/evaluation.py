@@ -35,10 +35,10 @@ def disc_evaluation(net, cfg, device, run_type: str, epoch: float, step: int, ma
 
             logits_SAR, logits_OPT, logits_fusion, disc_logits_sar, disc_logits_optical = net(imgs)
 
-            dis_GT_sar = torch.ones(([disc_logits_sar.shape[0], disc_logits_sar.shape[2], disc_logits_sar.shape[3]])).cuda()
+            dis_GT_sar = torch.ones(([disc_logits_sar.shape[0], disc_logits_sar.shape[2], disc_logits_sar.shape[3]])).to(device)
             #dis_GT_sar = torch.nn.functional.one_hot(dis_GT_sar.to(torch.int64)).view(-1,2)
 
-            dis_GT_optical = torch.ones(([disc_logits_optical.shape[0], disc_logits_optical.shape[2], disc_logits_optical.shape[3]])).cuda()
+            dis_GT_optical = torch.ones(([disc_logits_optical.shape[0], disc_logits_optical.shape[2], disc_logits_optical.shape[3]])).to(device)
             #dis_GT_optical = torch.nn.functional.one_hot(dis_GT_optical.to(torch.int64),2).view(-1,2)
 
             y_pred_sar = torch.argmax(disc_logits_sar,1)# > 0.5
